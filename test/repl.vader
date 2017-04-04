@@ -1,0 +1,95 @@
+#####################
+# The :Repl command #
+#####################
+
+# Use 'g:ft' for the mock file type
+Before (Define a mock file type and REPL):
+  set ft=---
+  let g:ft = &ft
+  let g:repl[g:ft] = {}
+  let g:repl[g:ft].binary = 'sh test/mock-repl.sh'
+  let g:repl[g:ft].args = ['arg1', 'arg2']
+  let g:repl[g:ft].syntax = g:ft
+  let g:repl[g:ft].title = 'Mock REPL'
+
+After (The REPL leaves us in insert mode, leave it):
+  stopinsert
+
+
+#-----------------------------------------------------------------------------
+Execute (No arguments opens a default prompt):
+  silent Repl
+
+Then (A terminal buffer with settings set):
+  Assert exists('b:repl["-"]')
+  AssertEqual g:repl[g:ft].syntax, &syntax
+  AssertEqual g:repl[g:ft].binary, b:repl['-'].binary
+  AssertEqual g:repl[g:ft].title, b:term_title
+  AssertEqual g:repl[g:ft].args, b:repl['-'].args
+  AssertEqual b:repl['-'], g:repl[g:ft].instances[0]
+  quit
+
+
+#-----------------------------------------------------------------------------
+Execute (User-supplied arguments):
+  silent Repl - foo bar
+
+Then (Arugments are appended to defaults):
+  AssertEqual b:repl['-'].args, g:repl[g:ft].args + ['foo', 'bar']
+
+
+#-----------------------------------------------------------------------------
+Execute (Tab-local settings override global ones):
+  let t:repl = {g:ft : {'title': 'Alternative title'}}
+  silent Repl
+
+Then (The title is different from the default):
+  AssertEqual b:term_title, t:repl[g:ft].title
+  quit
+
+
+#-----------------------------------------------------------------------------
+Execute (One Instance is spawned):
+  silent Repl
+
+Then (The instance is kept track of):
+  AssertEqual 1, len(g:repl[g:ft].instances)
+  AssertEqual b:repl['-'], g:repl[g:ft].instances[0]
+  quit
+  AssertEqual 0, len(g:repl[g:ft].instances)
+
+
+#-----------------------------------------------------------------------------
+Execute (Try spawning two REPLs without bang):
+  silent Repl
+  silent Repl
+
+Then (There is only one instance):
+  AssertEqual 1, len(g:repl[g:ft].instances)
+  quit
+
+
+#-----------------------------------------------------------------------------
+Execute (Try spawning two REPLs with bang):
+  silent Repl
+  silent Repl! ---
+
+Then (There are two instances):
+  AssertEqual 2, len(g:repl[g:ft].instances)
+  quit
+  quit
+
+
+#-----------------------------------------------------------------------------
+Execute (More than one instance is spawned):
+  silent Repl
+  silent Repl! ---
+
+Then (First two, then one, then no instance):
+  AssertEqual 2, len(g:repl[g:ft].instances)
+  AssertEqual b:repl['-'], g:repl[g:ft].instances[0]
+  quit
+  AssertEqual 1, len(g:repl[g:ft].instances)
+  AssertEqual b:repl['-'], g:repl[g:ft].instances[0]
+  quit
+  AssertEqual 0, len(g:repl[g:ft].instances)

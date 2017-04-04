@@ -1,0 +1,241 @@
+*repl.nvim.txt*                                                         {Nvim}
+
+                                                                        *REPL*
+              ____  _____ ____  _                  _~
+             |  _ \| ____|  _ \| |      _ ____   _(_)_ __ ___~
+             | |_) |  _| | |_) | |     | '_ \ \ / / | '_ ` _ \~
+             |  _ <| |___|  __/| |___ _| | | \ V /| | | | | | |~
+             |_| \_\_____|_|   |_____(_)_| |_|\_/ |_|_| |_| |_|~
+                                                  
+
+Author: Alejandro "HiPhish" Sanchez
+License: MIT License
+
+
+==============================================================================
+TABLE OF CONTENTS                                         *repl.nvim-contents*
+
+   1. Introduction ...................................... |repl.nvim-intro|
+   2. Setup ............................................. |repl.nvim-setup|
+   3. Running a REPL .................................... |repl.nvim-running|
+   4. Mappings .......................................... |repl.nvim-mappings|
+   5. Configuration ..................................... |repl.nvim-config|
+   6. Managing REPLs .................................... |repl.nvim-managing|
+   7. Included REPLs .................................... |repl.nvim-builtin|
+      7.1 Python ........................................ |repl.nvim-python|
+      7.2 GNU Guile ..................................... |repl.nvim-guile|
+   8. Defining new REPLs ................................ |repl.nvim-defining|
+
+==============================================================================
+INTRODUCTION                                          *repl.nvim-introduction*
+
+REPL.nvim provides quick, easy and customisable access to a REPL independent
+of language by wrapping itself around Nvim's terminal emulator. This allows
+for a quick and fully functional REPL from inside Nvim, but editing text is
+limited to the REPL's own interface.
+
+==============================================================================
+SETUP                                                        *repl.nvim-setup*
+
+The plugin itself is installed like any other Vim plugin. In addition need to
+have the REPL you want to use installed. It does not matter how or where the
+binary is located, you can change the setting, but the default is to use the
+system's command.
+
+==============================================================================
+RUNNING A REPL                                               *repl.nvim-setup*
+
+:Repl [{type} [{arg} ...]]                                             *:Repl*
+
+To spawn a new REPL instance run the `:Repl` command. The first argument is
+the type of REPL, if it is omitted the type will be guessed based on your file
+type. For instance, if you are editing a Python file a `'python'` REPL will be
+spawned. You can also use modifiers like `:vert`
+
+If a {type} argument is given that type will be used. However, if the {type}
+is `'-'` the type will be guessed again. This allows you to pass arguments to
+the REPL without having to specify the type.
+
+All the remaining arguments will be passed in the order they are given to the
+REPL binary. Putting it all together, to spawn a Python REPL in a vertical
+split with arguments you would run
+>
+    :Repl python - foo bar
+<
+
+To terminate a REPL either delete the buffer or terminate the REPL the same
+way you would if it was a standalone process.
+
+------------------------------------------------------------------------------
+:Repl! [{ytpe} [{arg} ...]]                                           *:Repl!*
+
+If there is already one or more instances running the command will move the
+cursor to the REPL window. To explicitly spawn a new instance use `:Repl!`.
+
+
+==============================================================================
+MAPPINGS                                                  *repl.nvim-mappings*
+
+The following key mappings are available. If no REPL instance is available a
+new REPL will be spawned. These mappings will switch the current window to the
+REPL. Example of use:
+>
+    nmap <leader>rs  <Plug>(ReplSend)
+    nmap <leader>rss <Plug>(ReplSendLine)
+    nmap <leader>rs_ <Plug>(ReplSendLine)
+
+    vmap <leader>rs  <Plug>(ReplSend)
+<
+You have to use `map` instead of `noremap` and the line-wise action is defined in
+case you have `_` remapped somewhere else.
+
+------------------------------------------------------------------------------
+<Plug>(ReplSend){motion}                                    *<Plug>(ReplSend)*
+{Visual}<Plug>(ReplSend)
+
+Send either the text {motion} moves over or the highlighted text to the REPL.
+
+------------------------------------------------------------------------------
+<Plug>(ReplSendLine)                                    *<Plug>(ReplSendLine)*
+
+Send the current line to the REPL. This is a convenience for mapping for the
+sequence `<Plug>(ReplSend)_` in case you have remapped `_`.
+
+
+==============================================================================
+CONFIGURATION                                        *repl.nvim-configuration*
+                                                                      *g:repl*
+                                                                      *t:repl*
+                                                                      *w:repl*
+                                                                      *b:repl*
+
+All settings are contained inside the `g:repl['type']` dictionary, where
+'type' is the type of the REPL. The key is the name of the setting and its
+value is the value. You can set individual entries according to your wishes;
+if you wanted to disable syntax highlighting in the REPL you would add the
+following to your `init.vim`:
+>
+    let g:repl['python'] = {'syntax': ''}
+<
+You do not have to add the default settings to your dictionary, this plugin is
+smart enough to not lose the defaults.
+
+Note  After Nvim has loaded up do not re-assign the `g:guile_repl` variable, set
+      its individual entries instead.
+
+It is also possible to specify local setting by using one of the scopes `t:`, `w:`
+or `b:`, with later ones taking precedence. The following is a listing of the
+default settings.
+
+------------------------------------------------------------------------------
+g:repl['type']['binary']                            *g:repl['type']['binary']*
+
+Which binary to execute for the REPL. The default uses the system binary.
+
+------------------------------------------------------------------------------
+g:repl['type']['args']                                *g:repl['type']['args']*
+
+Which arguments to pass to the executable, these arguments will be passed
+before the user-supplied arguments.
+
+------------------------------------------------------------------------------
+g:repl['type']['syntax']                            *g:repl['type']['syntax']*
+Default: 'scheme'~
+
+Which syntax highlighting to use for the REPL. Use the empty string if you
+wish to disable syntax highlighting.
+
+------------------------------------------------------------------------------
+:repl['type']['title']                               *g:repl['type']['title']*
+Default: 'Guile REPL'~
+
+The value used for the terminal buffer's `b:term_title` variable.
+
+
+==============================================================================
+MANAGING REPL INSTANCES                                      *repl.nvim-setup*
+
+The plugin keeps track of running REPL instances, allowing you to have more
+than one per type running at any time. Instances form a sort of stack with
+newer ones on top, and they are identified by their job ID (see the manual on
+|job-control|).
+
+------------------------------------------------------------------------------
+g:repl['type']['instances']                      *g:repl['type']['instances']*
+
+A list of running REPL instances ordered by the time they were spawned, with
+younger ones to the begging of the list. See |b:repl['-']| for the format of
+the entries.
+
+Note  You should not mutate this list yourself unless you know exactly what
+      you are doing. Terminated instances are removed automatically.
+
+------------------------------------------------------------------------------
+b:repl['-']                                                      *b:repl['-']*
+
+Every REPL instance buffer is created with this dictionary. It contains the
+information about that particular instance and |g:guile_repl['instances']| has a
+reference to it. The entries are as follows:
+>
+   'binary': The binary name which was invoked
+   'buffer': Buffer number of the REPL
+   'args'  : REPL arguments as a list, contains default and user ones
+   'job_id': Job ID of the REPL process
+<
+Note  The instance is stored under the key `'-'` because that is a reserved
+      key which will never name-collide with any existing REPL type.
+
+
+==============================================================================
+INCLUDED REPL TYPES                                        *repl.nvim-builtin*
+
+The following REPL types are defined out of the box. The change their default
+settings see |repl.nvim-config|.
+
+------------------------------------------------------------------------------
+PYTHON                                                      *repl.nvim-python*
+>
+    g:repl.python = {
+        'binary': 'python',
+        'args': [],
+        'syntax': '',
+        'title': 'Python REPL',
+    }
+<
+The shell default Python interpreter is used. This works nicely with virtual
+environments where `python` defaults to the binary of the environment.
+
+------------------------------------------------------------------------------
+GNU GUILE                                                    *repl.nvim-guile*
+>
+    g:repl.guile = {
+        'binary': 'guile',
+        'args': ['-L', '.'],
+        'syntax': 'scheme',
+        'title': 'Guile REPL',
+    }
+<
+The arguments add the current working directory to the module load path.
+
+
+==============================================================================
+DEFINING NEW REPL TYPES                                      *repl.nvim-setup*
+
+Plugin authors can define new types of REPL to integrate with REPL.nvim as
+standalone plugins. You must define a dictionary entry for the new REPL type
+that specifies all the necessary information (see |repl.nvim-builtin| for
+comaprison). As an example, here is how we can define a Ruby REPL:
+>
+    let g:repl['ruby'] = {
+        \ 'binary': 'irb',
+        \ 'args': [],
+        \ 'syntax': 'ruby',
+        \ 'title': 'Ruby REPL',
+    \ }
+<
+If you want to place this definition inside a file it must be source after the
+normal plugin files. One easy way is to put it inside the |after-directory|.
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
+
