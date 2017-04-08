@@ -111,17 +111,23 @@ CONFIGURATION                                        *repl.nvim-configuration*
 
 All settings are contained inside the `g:repl['type']` dictionary, where
 'type' is the type of the REPL. The key is the name of the setting and its
-value is the value. You can set individual entries according to your wishes;
-if you wanted to disable syntax highlighting in the REPL you would add the
-following to your `init.vim`:
+value is the value or a function reference. You can set individual entries
+according to your wishes; if you wanted to disable syntax highlighting in the
+REPL you would add the following to your `init.vim`:
 >
     let g:repl['python'] = {'syntax': ''}
 <
 You do not have to add the default settings to your dictionary, this plugin is
 smart enough to not lose the defaults.
 
-Note  After Nvim has loaded up do not re-assign the `g:guile_repl` variable, set
-      its individual entries instead.
+Settings are allowed to be a function reference (or a lambda) to a function
+which takes no arguments. This allows you to dynamically generate settings
+instead of deciding ahead of time.
+>
+    let g:repl['python'] = {'syntax': {-> ''}}
+<
+Note  After Nvim has loaded up do not re-assign the `g:repl` variable, set its
+      individual entries instead.
 
 It is also possible to specify local setting by using one of the scopes `t:`, `w:`
 or `b:`, with later ones taking precedence. The following is a listing of the

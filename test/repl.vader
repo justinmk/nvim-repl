@@ -39,6 +39,18 @@ Then (Arugments are appended to defaults):
 
 
 #-----------------------------------------------------------------------------
+Execute (Function reference settings):
+  function! FooSyntax()
+      return 'foo_syntax'
+  endfunction
+  let g:repl[g:ft].syntax = function('FooSyntax')
+  silent Repl
+
+Then (Function reference gets evaluated):
+  AssertEqual 'foo_syntax', &syntax
+
+
+#-----------------------------------------------------------------------------
 Execute (Tab-local settings override global ones):
   let t:repl = {g:ft : {'title': 'Alternative title'}}
   silent Repl

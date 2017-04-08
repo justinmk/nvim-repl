@@ -95,32 +95,36 @@ function! s:repl(mods, bang, ...)
 	" loop over the lower scopes in a given order. If we encounter the same
 	" setting it overwrites the previous values. The scopes are ordered by
 	" ascending significance, with the most significant being last.
-	for l:key in keys(g:repl[l:type])
-		silent execute 'let l:'.l:key.' = g:repl[l:type]["'.key.'"]'
+	let l:repl = copy(g:repl[l:type])
+	for l:key in keys(l:repl)
 		for l:scope in ['t', 'w', 'b']
 			let l:entry = l:scope.':repl["'.l:type.'"]["'.l:key.'"]'
 			if exists(l:entry)
-				silent execute 'let l:'.l:key.' = '.l:entry
+				silent execute 'let l:repl["'.l:key.'"] = '.l:entry
 			endif
 		endfor
+		" If the option is a function reference call it
+		if type(l:repl[l:key]) == type(function('type'))
+			let l:repl[l:key] = l:repl[l:key]()
+		endif
 	endfor
 
 	" Append the argument to the command to the argument list (but skip the
 	" first argument, that is the file type)
-	let l:args = l:args + a:000[1:]
+	let l:repl.args = l:repl.args + a:000[1:]
 
 	" Open a new buffer and launch the terminal
 	silent execute a:mods 'new'
-	silent execute 'terminal' l:binary join(l:args, ' ')
-	silent execute 'set syntax='.l:syntax
-	silent let b:term_title = l:title
+	silent execute 'terminal' l:repl.binary join(l:repl.args, ' ')
+	silent execute 'set syntax='.l:repl.syntax
+	silent let b:term_title = l:repl.title
 
 	" Collect information about this REPL instance
 	let b:repl = {
 		\ '-': {
 			\ 'type'   : l:type,
-			\ 'binary' : l:binary,
-			\ 'args'   : l:args,
+			\ 'binary' : l:repl.binary,
+			\ 'args'   : l:repl.args,
 			\ 'job_id' : b:terminal_job_id,
 			\ 'buffer' : bufnr('%')
 		\ }

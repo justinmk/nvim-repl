@@ -94,6 +94,14 @@ in the rest.
    " Add Python syntax highlighting
    let g:repl['python'] = {'syntax': 'python'}
 
+You can also use function references of lambdas as option values if the
+function reference does not take any arguments.
+
+.. code-block:: vim
+
+   " Add Python syntax highlighting
+   let g:repl['python'] = {'syntax': {-> 'python'}}
+
 After Nvim has loaded you can the dictionary entries. If you wanted to turn
 syntax highlighting back off after starting up Nvim you would execute
 
@@ -143,16 +151,12 @@ bound to the same interface. You cannot use Vim's commands to edit text, you
 instead have to enter terminal mode (insert mode for the terminal) to modify
 text.
 
-Syntax highlighting uses Vim's Scheme highlighting, but this might not always
-be adequate. Highlighting the prompt or the backtrace as if it was regular
-Scheme code is wrong.
-
 
 
 License
 #######
 
-REPL.nvim is release under the terms of the MIT license. See the `LICENSE.txt`_
+REPL.nvim is release under the terms of the MIT license. See the `COPYING.txt`_
 file for details.
 
-.. _LICENSE.txt: LICENSE.txt
+.. _COPYING.txt: COPYING.txt

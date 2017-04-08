@@ -2,7 +2,7 @@
  Things that need to be done
 #############################
 
-:date: 2017-04-03
+:date: 2017-04-08
 
 .. default-role:: code
 
@@ -53,12 +53,6 @@ Use a regular buffer
    user cannot use regular Vim commands. A regular buffer that sends commands
    from the buffer to the REPL process and puts responses into the buffer would
    be a superior choice.
-
-
-De-hardcode settings
-   Settings must be hard-coded by the user; for instance, this means the user
-   has to specify a particular string for the binary. It would be preferable if
-   the user could specify a function reference that returns the string instead.
 
 
 Have functions in addition to the command
