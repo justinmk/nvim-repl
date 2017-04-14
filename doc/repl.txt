@@ -22,8 +22,8 @@ TABLE OF CONTENTS                                         *repl.nvim-contents*
    5. Configuration ..................................... |repl.nvim-config|
    6. Managing REPLs .................................... |repl.nvim-managing|
    7. Included REPLs .................................... |repl.nvim-builtin|
-      7.1 Python ........................................ |repl.nvim-python|
-      7.2 GNU Guile ..................................... |repl.nvim-guile|
+      7.1 GNU Guile ..................................... |repl.nvim-guile|
+      7.2 Python ........................................ |repl.nvim-python|
    8. Defining new REPLs ................................ |repl.nvim-defining|
 
 ==============================================================================
@@ -205,6 +205,18 @@ The following REPL types are defined out of the box. The change their default
 settings see |repl.nvim-config|.
 
 ------------------------------------------------------------------------------
+GNU GUILE                                                    *repl.nvim-guile*
+>
+    g:repl.guile = {
+        'binary': 'guile',
+        'args': ['-L', '.'],
+        'syntax': 'scheme',
+        'title': 'Guile REPL',
+    }
+<
+The arguments add the current working directory to the module load path.
+
+------------------------------------------------------------------------------
 PYTHON                                                      *repl.nvim-python*
 >
     g:repl.python = {
@@ -216,18 +228,6 @@ PYTHON                                                      *repl.nvim-python*
 <
 The shell default Python interpreter is used. This works nicely with virtual
 environments where `python` defaults to the binary of the environment.
-
-------------------------------------------------------------------------------
-GNU GUILE                                                    *repl.nvim-guile*
->
-    g:repl.guile = {
-        'binary': 'guile',
-        'args': ['-L', '.'],
-        'syntax': 'scheme',
-        'title': 'Guile REPL',
-    }
-<
-The arguments add the current working directory to the module load path.
 
 
 ==============================================================================
