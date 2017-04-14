@@ -104,9 +104,23 @@ REPL, except if the argument is `'-'`. If the first argument is `'-'` or there
 are no arguments we have to guess the type based on the current file type.
 
 We support the dotted file type syntax: first try all the dot-separated atomic
-types from left to right. Later types override previous ones. Finally try the
-whole file type. This means that if our file type is `scheme.guile` the types
-tried are `scheme`, `guile` and `scheme.guile`, in that order.
+types from left to right. Later types override previous ones. Then keep trying
+progressively more compound file types until the whole file type. This means
+that if our file type is `scheme.guile` the types tried are `scheme`, `guile`
+and `scheme.guile`, in that order.
+
+The algorithm is as follows:
+
+- Given a list `FTs` with length `l`
+
+- For `i` in the range from `0` (inclusive) to `l` (exclusive)
+
+  - For `j` in the range from `0` (inclusive) to `l - i` (inclusive)
+
+    - The file type is `l[j: j + i]` (join items vial `.`)
+
+This algorithm sorts file types by length and gives later types priority over
+earlier ones.
 
 If no type could be found an error is displayed and the function returns with
 no value and no side effects.

@@ -66,8 +66,14 @@ split with arguments you would run
 To terminate a REPL either delete the buffer or terminate the REPL the same
 way you would if it was a standalone process.
 
+REPL.nvim supports detection of dotted file types like `scheme.guile`. The
+individual types are tried from left to right with later matches overriding
+earlier ones. Following the individual types, larger compound types are tried
+as well from left to right and increasing it size. Example: if the file type
+is `a.b.c` the types tried are `a`, `b`, `c`, `a.b`, `b.c` and `a.b.c`.
+
 ------------------------------------------------------------------------------
-:Repl! [{ytpe} [{arg} ...]]                                           *:Repl!*
+:Repl! [{type} [{arg} ...]]                                           *:Repl!*
 
 If there is already one or more instances running the command will move the
 cursor to the REPL window. To explicitly spawn a new instance use `:Repl!`.

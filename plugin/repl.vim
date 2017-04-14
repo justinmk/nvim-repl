@@ -54,14 +54,20 @@ function! s:repl(mods, bang, ...)
 			return
 		endif
 	else
-		for l:ft in split(&filetype, '\v\.')
-			if exists('g:repl["'.l:ft.'"]')
-				let l:type = l:ft
-			endif
+		" First split the file type at the dots, then loop over the list
+		let l:fts = split(&filetype, '\v\.')
+
+		" Start with single types and gradually move to longer types, i.e.
+		" 'a', 'b', 'c', 'a.b', 'b.c', 'a.b.c'
+		for l:i in range(0, len(l:fts) - 1)
+			for l:j in range(0, len(l:fts) - l:i -1)
+				let l:ft = join(l:fts[l:j : l:j + l:i], '.')
+				if exists('g:repl["'.l:ft.'"]')
+					let l:type = l:ft
+				endif
+			endfor
 		endfor
-		if exists('g:repl["'.&filetype.'"]')
-			let l:type = l:ft
-		endif
+
 		if empty(l:type)
 			echohl ErrorMsg
 			echom 'No REPL for current file type defined'
