@@ -1,8 +1,7 @@
-.. default-role:: code
-
 ###########################
  Contributing to REPL.nvim
 ###########################
+.. default-role:: code
 
 
 If you decide to contribute to the development of REPL.nvim please follow the
@@ -28,7 +27,7 @@ Do not:
 Technical writing
 #################
 
-We use reStructureText_ (reST) for documenting the project. Please follow these
+We use reStructuredText_ (reST) for documenting the project. Please follow these
 guidelines:
 
 - Use proper quotes:
@@ -55,10 +54,6 @@ guidelines:
 
   This makes it easy for readers to jump directly to that file.
 
-- Annotate the `TODO.rst`_ file‘s document title with the date when you made
-  the change. I'm not sure if that‘s a good rule, might remove the rule later.
 
-
-.. _reStructureText: http://docutils.sourceforge.net/rst.html
+.. _reStructuredText: http://docutils.sourceforge.net/rst.html
 .. _HACKING.rst: HACKING.rst
-.. _TODO.rst: TODO.rst

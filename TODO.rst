@@ -1,9 +1,6 @@
 #############################
  Things that need to be done
 #############################
-
-:date: 2017-04-08
-
 .. default-role:: code
 
 
