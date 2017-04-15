@@ -36,18 +36,24 @@ endif
 " title  : Value of b:term_title
 " ----------------------------------------------------------------------------
 let s:repl = {
+	\ 'guile' : {
+		\ 'binary': 'guile',
+		\ 'args': ['-L', '.'],
+		\ 'syntax': 'scheme',
+		\ 'title': 'Guile REPL',
+	\ },
 	\ 'python' : {
 		\ 'binary': 'python',
 		\ 'args': [],
 		\ 'syntax': '',
 		\ 'title': 'Python REPL',
 	\ },
-	\ 'guile' : {
-		\ 'binary': 'guile',
-		\ 'args': ['-L', '.'],
-		\ 'syntax': 'scheme',
-		\ 'title': 'Guile REPL',
-	\ }
+	\ 'sh' : {
+		\ 'binary': 'sh',
+		\ 'args': [],
+		\ 'syntax': '',
+		\ 'title': 'Bourne Shell',
+	\ },
 \ }
 
 

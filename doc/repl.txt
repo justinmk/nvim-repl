@@ -22,8 +22,9 @@ TABLE OF CONTENTS                                         *repl.nvim-contents*
    5. Configuration ..................................... |repl.nvim-config|
    6. Managing REPLs .................................... |repl.nvim-managing|
    7. Included REPLs .................................... |repl.nvim-builtin|
-      7.1 GNU Guile ..................................... |repl.nvim-guile|
-      7.2 Python ........................................ |repl.nvim-python|
+      7.1 Bourne Shell .................................. |repl.nvim-sh|
+      7.2 GNU Guile ..................................... |repl.nvim-guile|
+      7.3 Python ........................................ |repl.nvim-python|
    8. Defining new REPLs ................................ |repl.nvim-defining|
 
 ==============================================================================
@@ -203,6 +204,19 @@ INCLUDED REPL TYPES                                        *repl.nvim-builtin*
 
 The following REPL types are defined out of the box. The change their default
 settings see |repl.nvim-config|.
+
+------------------------------------------------------------------------------
+BOURNE SHELL                                                    *repl.nvim-sh*
+>
+    g:repl.sh : {
+        'binary': 'sh',
+        'args': [],
+        'syntax': '',
+        'title': 'Bourne Shell',
+    }
+<
+The Bourne Shell defaults to your system `sh` binary. Beware that this  might
+actually be the Bourne Again Shell (`bash`) under the hood.
 
 ------------------------------------------------------------------------------
 GNU GUILE                                                    *repl.nvim-guile*
