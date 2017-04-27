@@ -5,27 +5,20 @@
 ####################################################################
 
 REPL.nvim bring REPL support to Nvim! Use the built-in REPLs, add your own, or
-change the existing ones. Change settings in your `init.vim` or on the fly,
-make them global or local, use the existing ones or make your own.
+change the existing ones.Here are some of the highlights:
 
-
-What is REPL.nvim?
-##################
+- Fully customisable: Change any aspect of any REPL you wish in your `init.vim`
+  or in command mode
+- Declarative and functional: options can be both values or functions which
+  expand to values
+- Expandable: Define all new REPLs from ground up
+- API functions: Use functions in your own plugin or reroute existing ones
 
 To put it simply, REPL.nvim adds a wrapper command that allows you to spawn a
 REPL instance in a terminal buffer. What makes REPL.nvim stand out is the
 amount of control it gives users. The plugin is designed to make configuration
 as clean and simple as possible, to allow spawning any number of REPL instances
 and add any type of REPL the user wishes with minimal effort.
-
-Let‘s say you are working on a Python script and you want to try a snippet out
-in the REPL. Without REPL.nvim you would have to execute `:new` followed by
-`:terminal python` to get a REPL instance. This is not a big deal for one
-instance, but it adds up over time.
-
-With REPL.nvim on the other hand you only execute `:Repl` to spawn a new Python
-REPL instance. What if you are not actually a Python file at the moment? You
-can specify the REPL type as the first argument: `:Repl python`.
 
 
 Setup and quick start
@@ -34,19 +27,19 @@ Setup and quick start
 Installation
 ============
 
-Instal REPL.nvim like any other plugin. You will also need to have the REPLs
-you want to use installed on your system.
+Instal REPL.nvim like any other plugin. You will also need to have the binaries
+of the REPLs you want to use installed on your system.
 
 
 Starting a REPL
 ===============
 
 A new REPL window is created by running the `:Repl` command. You can use the
-same arguments you can also use with your binary. Example:
+same arguments you can use with the binary. Example:
 
 .. code-block:: vim
 
-   " Add the current working directory to the load path
+   " Load a given file at startup
    :Repl guile -l my-file.scm
 
    " Evaluate an expression and exit (escape the space after 'display')
@@ -94,16 +87,16 @@ in the rest.
    " Add Python syntax highlighting
    let g:repl['python'] = {'syntax': 'python'}
 
-You can also use function references of lambdas as option values if the
+You can also use function references or lambdas as option values if the
 function reference does not take any arguments.
 
 .. code-block:: vim
 
-   " Add Python syntax highlighting
+   " Add Python syntax highlighting as a lambda
    let g:repl['python'] = {'syntax': {-> 'python'}}
 
-After Nvim has loaded you can the dictionary entries. If you wanted to turn
-syntax highlighting back off after starting up Nvim you would execute
+After Nvim has loaded you can change the dictionary entries. If you wanted to
+turn syntax highlighting back off after starting up Nvim you would execute
 
 .. code-block:: vim
 
