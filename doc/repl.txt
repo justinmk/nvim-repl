@@ -246,6 +246,18 @@ PYTHON                                                      *repl.nvim-python*
 The shell default Python interpreter is used. This works nicely with virtual
 environments where `python` defaults to the binary of the environment.
 
+------------------------------------------------------------------------------
+BOURNE SHELL                                                    *repl.nvim-sh*
+>
+    g:repl.sh = {
+        'bin': 'sh',
+        'args': [],
+        'syntax': '',
+        'title': 'Bourne Shell',
+    }
+<
+The Bourne shell is basically like executing the |:terminal| command.
+
 
 ==============================================================================
 DEFINING NEW REPL TYPES                                      *repl.nvim-setup*
