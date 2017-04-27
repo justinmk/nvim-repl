@@ -21,8 +21,8 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-# This is a mock version of Guile. It is not interactive, it only serves for
-# testing the Guile-REPL plugin.
+# This is a mock version of a REPL. It is not interactive, it only serves for
+# testing the REPL.nvim plugin.
 
 EOF=false
 

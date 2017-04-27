@@ -55,24 +55,15 @@ let s:repl = {
 		\ 'title': 'Bourne Shell',
 	\ },
 \ }
-
-
 " ----------------------------------------------------------------------------
+
+
 " Build a dictionary to hold global setting if there is none
-" ----------------------------------------------------------------------------
 if !exists('g:repl')
 	let g:repl = {}
 endif
 
 " Assign the default options, respect user settings
 for s:type in keys(s:repl)
-	if !exists('g:repl["'.s:type.'"]')
-		let g:repl[s:type] = s:repl[s:type]
-		continue
-	endif
-	for s:option in keys(s:repl[s:type])
-		if !exists('g:repl["'.s:type.'"]["'.s:option.'"]')
-			let g:repl[s:type][s:option] = s:repl[s:type][s:option]
-		endif
-	endfor
+	call repl#define_repl(s:type, s:repl[s:type], 'keep')
 endfor

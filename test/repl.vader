@@ -31,39 +31,6 @@ Then (A terminal buffer with settings set):
 
 
 #-----------------------------------------------------------------------------
-Execute (Dotted file type, single type):
-  set ft=a.b.c
-  " Remove false positives just in case they exist
-  if exists('g:repl["a"]')
-    remove(g:repl, 'a')
-  endif
-  if exists('g:repl["b"]')
-    remove(g:repl, 'b')
-  endif
-  let g:repl['c'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
-  silent Repl
-
-Then (Type 'c' is recognised):
-  AssertEqual b:repl['-'].type, 'c'
-  quit
-
-
-#-----------------------------------------------------------------------------
-Execute (Dotted file type, compound type):
-  set ft=a.b.c
-  " Remove false positives just in case they exist
-  if exists('g:repl["a.b"]')
-    remove(g:repl, 'a.b')
-  endif
-  let g:repl['b.c'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
-  silent Repl
-
-Then (Type 'b.c' is recognised):
-  AssertEqual b:repl['-'].type, 'b.c'
-  quit
-
-
-#-----------------------------------------------------------------------------
 Execute (User-supplied arguments):
   silent Repl - foo bar
 

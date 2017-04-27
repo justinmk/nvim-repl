@@ -1,0 +1,64 @@
+################
+# The REPL API #
+################
+
+# This test file is intended for testing the REPL.nvim API in isolation from
+# the ':Repl' command.
+
+# Cleaning up the global settings ensures that user-specific settings do not
+# interfere with testing.
+Before (Clean up the g:repl variable):
+  let g:repl = {}
+
+
+#--- repl#guess_type ---------------------------------------------------------
+Execute (Dotted file type, single type):
+  let g:repl['c'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+
+Then (Type 'c' is recognised):
+  AssertEqual repl#guess_type('a.b.c'), 'c'
+
+
+Execute (Dotted file type, compound type):
+  let g:repl['b.c'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+
+Then (Type 'b.c' is recognised):
+  AssertEqual repl#guess_type('a.b.c'), 'b.c'
+
+
+Execute (Non-existing type):
+
+Then (An error is thrown):
+  AssertThrows call repl#guess_type('foo')
+
+
+#-- repl#define_repl ---------------------------------------------------------
+Execute (Defining a new REPL):
+  let foo = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+  call repl#define_repl('foo', foo, 'keep')
+
+Then (The new entry is in g:repl):
+  AssertEqual g:repl.foo, foo
+
+
+Execute (Keeping settings of an existing REPL):
+  let g:repl['foo'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+  call repl#define_repl('foo', {'binary': 'bar'}, 'keep')
+
+Then (The settings are unchanged):
+  AssertEqual g:repl.foo.binary, ''
+
+
+Execute (Forcing new settings onto an existing REPL):
+  let g:repl['foo'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+  call repl#define_repl('foo', {'binary': 'bar'}, 'force')
+
+Then (The settings are unchanged):
+  AssertEqual g:repl.foo.binary, 'bar'
+
+
+Execute (Throwing an error when re-defining a REPL):
+  let g:repl['foo'] = {'binary': '', 'args': [], 'syntax': '', 'title': ''}
+
+Then (The settings are unchanged):
+  AssertThrows call repl#define_repl('foo', {'binary', ''}, 'error')

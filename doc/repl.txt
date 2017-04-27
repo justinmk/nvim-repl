@@ -15,6 +15,7 @@ License: MIT License
 ==============================================================================
 TABLE OF CONTENTS                                         *repl.nvim-contents*
 
+Part I - User manual~
    1. Introduction ...................................... |repl.nvim-intro|
    2. Setup ............................................. |repl.nvim-setup|
    3. Running a REPL .................................... |repl.nvim-running|
@@ -26,6 +27,10 @@ TABLE OF CONTENTS                                         *repl.nvim-contents*
       7.2 GNU Guile ..................................... |repl.nvim-guile|
       7.3 Python ........................................ |repl.nvim-python|
    8. Defining new REPLs ................................ |repl.nvim-defining|
+   9. API ............................................... |repl.nvim-api|
+
+Part II - API reference~
+   guess_type ........................................... |repl#guess_type()|
 
 ==============================================================================
 INTRODUCTION                                          *repl.nvim-introduction*
@@ -49,9 +54,10 @@ RUNNING A REPL                                               *repl.nvim-setup*
 :Repl [{type} [{arg} ...]]                                             *:Repl*
 
 To spawn a new REPL instance run the `:Repl` command. The first argument is
-the type of REPL, if it is omitted the type will be guessed based on your file
-type. For instance, if you are editing a Python file a `'python'` REPL will be
-spawned. You can also use modifiers like `:vert`
+the type of REPL, if it is omitted the type will be guessed based on the
+current |'filetype'| according to |repl#guess_type()|. For instance, if you
+are editing a Python file a `'python'` REPL will be spawned. You can also use
+modifiers like `:vert`.
 
 If a {type} argument is given that type will be used. However, if the {type}
 is `'-'` the type will be guessed again. This allows you to pass arguments to
@@ -66,12 +72,6 @@ split with arguments you would run
 
 To terminate a REPL either delete the buffer or terminate the REPL the same
 way you would if it was a standalone process.
-
-REPL.nvim supports detection of dotted file types like `scheme.guile`. The
-individual types are tried from left to right with later matches overriding
-earlier ones. Following the individual types, larger compound types are tried
-as well from left to right and increasing it size. Example: if the file type
-is `a.b.c` the types tried are `a`, `b`, `c`, `a.b`, `b.c` and `a.b.c`.
 
 ------------------------------------------------------------------------------
 :Repl! [{type} [{arg} ...]]                                           *:Repl!*
@@ -139,6 +139,9 @@ Note  After Nvim has loaded up do not re-assign the `g:repl` variable, set its
 It is also possible to specify local setting by using one of the scopes `t:`, `w:`
 or `b:`, with later ones taking precedence. The following is a listing of the
 default settings.
+
+Note  The |repl#define_repl()| function provides a safe way of defining or
+      modifying the entries of `g:repl`.
 
 ------------------------------------------------------------------------------
 g:repl['type']['binary']                            *g:repl['type']['binary']*
@@ -248,19 +251,86 @@ environments where `python` defaults to the binary of the environment.
 DEFINING NEW REPL TYPES                                      *repl.nvim-setup*
 
 Plugin authors can define new types of REPL to integrate with REPL.nvim as
-standalone plugins. You must define a dictionary entry for the new REPL type
-that specifies all the necessary information (see |repl.nvim-builtin| for
-comaprison). As an example, here is how we can define a Ruby REPL:
+standalone plugins. You must define a dictionary for the new REPL type that
+specifies all the necessary information (see |repl.nvim-builtin| for
+comaprison) and pass it as an argument to |repl#define_repl|. As an example,
+here is how we can define a Ruby REPL:
 >
-    let g:repl['ruby'] = {
+    let ruby_repl = {
         \ 'binary': 'irb',
         \ 'args': [],
         \ 'syntax': 'ruby',
         \ 'title': 'Ruby REPL',
     \ }
+
+    " Throw an error if there is already a Ruby REPL defined
+    call repl#define_repl('ruby', ruby_repl, 'error')
 <
-If you want to place this definition inside a file it must be source after the
-normal plugin files. One easy way is to put it inside the |after-directory|.
+If you want to place this definition inside a file it must be sourced after
+the normal plugin files, e.g. by putting it inside the |after-directory|.
+
+
+==============================================================================
+API                                                            *repl.nvim-api*
+
+The API provides users with a public interface to control REPL.nvim from a
+higher level. You can use the API with your own configuration or to provide
+REPL integration with other plugins.
+
+
+------------------------------------------------------------------------------
+repl#guess_type({ft})                                      *repl#guess_type()*
+
+Tries to guess the type of the REPL based on the file type string {ft}.
+
+Arguments:~
+  {ft}  File type string according to |filetype|
+
+Returns:~
+  A matching REPL type if one was found.
+
+Throws:~
+  `'nomatch'`  No matching REPL type was found
+
+
+For atomic types this means looking up {ft} as the key into `g:repl`. For
+compound file types (see |'ft'|) a number of combinations are tried; first
+{ft} is split on the dots and all the atomic types are tried from left to
+right. Then progressively larger combinations of the atomic types are tried
+with the complete {ft} string being last. The last successfully matching
+combination is returned.
+
+Example  If {ft} is `'a.b.c'` the following combinations are tried in this
+         order: `'a'`, `'b'`, `'c'`, `'a.b'`, `'b.c'`, `'a.b.c'`
+
+As a rule of thumb remember: the more to the right, the more specific the
+type, and more complex types take precedence over simpler ones.
+
+
+------------------------------------------------------------------------------
+repl#define_repl({type}, {repl}, {force})                 *repl#define_repl()*
+
+Defines a new REPL or extends and existing one. If the {repl} has not yet be
+defined it is added to |g:repl| as a new entry. Otherwise the behaviour
+depends on the value of the {force} argument.
+
+Arguments:~
+  {type}   The type of the REPL, it will be used as a key into |g:repl|
+  {repl}   Dictionary of settings for the new REPL
+  {force}  Either 'keep', 'force' or 'error'; this argument tells the function
+           what to do if {type} is already in |g:repl|. The behaviour is the
+           same as that of the third argument to |extend()|.
+
+Use this function to define a new REPL instead of assigning entries to
+|g:repl| manually. A value of 'force' is particularly useful because it allows
+overriding existing options:
+>
+    call repl#define_repl('python', {'binary': 'python3'}, 'force')
+<
+This will change the binary, but leave other options as they are.
+
+------------------------------------------------------------------------------
+
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:
