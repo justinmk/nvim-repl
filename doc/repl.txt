@@ -247,6 +247,30 @@ The shell default Python interpreter is used. This works nicely with virtual
 environments where `python` defaults to the binary of the environment.
 
 ------------------------------------------------------------------------------
+R7RS                                                          *repl.nvim-r7rs*
+
+There are two variations of R7RS, called R7RS small and R7RS large
+respectively. The large language has not been fully standardised yet, so only
+the small one is supported at the moment. The 'r7rs' REPL is an alias for
+'r7rs-small'
+>
+    g:repl.r7rs-small = {
+        'bin': 'chibi-scheme',
+        'args': ['-I', '.'],
+        'syntax': '',
+        'title': 'Chibi Scheme',
+    }
+<
+Chibi Scheme is a very small implementation of the R7RS, so this seems to be
+a reasonably universal choice. The arguments will add the current working
+directory to the front of the load path list.
+
+------------------------------------------------------------------------------
+SCHEME                                                      *repl.nvim-scheme*
+
+See |repl.nvim-r7rs|.
+
+------------------------------------------------------------------------------
 BOURNE SHELL                                                    *repl.nvim-sh*
 >
     g:repl.sh = {

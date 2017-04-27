@@ -36,25 +36,35 @@ endif
 " title  : Value of b:term_title
 " ----------------------------------------------------------------------------
 let s:repl = {
-	\ 'guile' : {
+	\ 'guile': {
 		\ 'bin': 'guile',
 		\ 'args': ['-L', '.'],
 		\ 'syntax': 'scheme',
 		\ 'title': 'Guile REPL',
 	\ },
-	\ 'python' : {
+	\ 'python': {
 		\ 'bin': 'python',
 		\ 'args': [],
 		\ 'syntax': '',
 		\ 'title': 'Python REPL',
 	\ },
-	\ 'sh' : {
+	\ 'r7rs-small': {
+		\ 'bin': 'chibi-scheme',
+		\ 'args': ['-I', '.'],
+		\ 'syntax': '',
+		\ 'title': 'Chibi Scheme',
+	\ },
+	\ 'sh': {
 		\ 'bin': 'sh',
 		\ 'args': [],
 		\ 'syntax': '',
 		\ 'title': 'Bourne Shell',
 	\ },
 \ }
+
+" ----------------------------------------------------------------------------
+let s:repl['r7rs'] = copy(s:repl['r7rs-small'])
+let s:repl['scheme'] = copy(s:repl['r7rs-small'])
 " ----------------------------------------------------------------------------
 
 
