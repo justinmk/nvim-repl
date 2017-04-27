@@ -110,7 +110,7 @@ function! s:repl(mods, bang, ...)
 
 	" Open a new buffer and launch the terminal
 	silent execute a:mods 'new'
-	silent execute 'terminal' l:repl.binary join(l:repl.args, ' ')
+	silent execute 'terminal' l:repl.bin join(l:repl.args, ' ')
 	silent execute 'set syntax='.l:repl.syntax
 	silent let b:term_title = l:repl.title
 
@@ -118,7 +118,7 @@ function! s:repl(mods, bang, ...)
 	let b:repl = {
 		\ '-': {
 			\ 'type'   : l:type,
-			\ 'binary' : l:repl.binary,
+			\ 'bin'    : l:repl.bin,
 			\ 'args'   : l:repl.args,
 			\ 'job_id' : b:terminal_job_id,
 			\ 'buffer' : bufnr('%')

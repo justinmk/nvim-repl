@@ -144,7 +144,7 @@ Note  The |repl#define_repl()| function provides a safe way of defining or
       modifying the entries of `g:repl`.
 
 ------------------------------------------------------------------------------
-g:repl['type']['binary']                            *g:repl['type']['binary']*
+g:repl['type']['bin']                                  *g:repl['type']['bin']*
 
 Which binary to execute for the REPL. The default uses the system binary.
 
@@ -193,7 +193,7 @@ Every REPL instance buffer is created with this dictionary. It contains the
 information about that particular instance and |g:guile_repl['instances']| has a
 reference to it. The entries are as follows:
 >
-   'binary': The binary name which was invoked
+   'bin'   : The binary name which was invoked
    'buffer': Buffer number of the REPL
    'args'  : REPL arguments as a list, contains default and user ones
    'job_id': Job ID of the REPL process
@@ -212,7 +212,7 @@ settings see |repl.nvim-config|.
 BOURNE SHELL                                                    *repl.nvim-sh*
 >
     g:repl.sh : {
-        'binary': 'sh',
+        'bin': 'sh',
         'args': [],
         'syntax': '',
         'title': 'Bourne Shell',
@@ -225,7 +225,7 @@ actually be the Bourne Again Shell (`bash`) under the hood.
 GNU GUILE                                                    *repl.nvim-guile*
 >
     g:repl.guile = {
-        'binary': 'guile',
+        'bin': 'guile',
         'args': ['-L', '.'],
         'syntax': 'scheme',
         'title': 'Guile REPL',
@@ -237,7 +237,7 @@ The arguments add the current working directory to the module load path.
 PYTHON                                                      *repl.nvim-python*
 >
     g:repl.python = {
-        'binary': 'python',
+        'bin': 'python',
         'args': [],
         'syntax': '',
         'title': 'Python REPL',
@@ -257,7 +257,7 @@ comaprison) and pass it as an argument to |repl#define_repl|. As an example,
 here is how we can define a Ruby REPL:
 >
     let ruby_repl = {
-        \ 'binary': 'irb',
+        \ 'bin': 'irb',
         \ 'args': [],
         \ 'syntax': 'ruby',
         \ 'title': 'Ruby REPL',
@@ -325,7 +325,7 @@ Use this function to define a new REPL instead of assigning entries to
 |g:repl| manually. A value of 'force' is particularly useful because it allows
 overriding existing options:
 >
-    call repl#define_repl('python', {'binary': 'python3'}, 'force')
+    call repl#define_repl('python', {'bin': 'python3'}, 'force')
 <
 This will change the binary, but leave other options as they are.
 

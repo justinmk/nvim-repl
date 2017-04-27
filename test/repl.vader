@@ -7,7 +7,7 @@ Before (Define a mock file type and REPL):
   set ft=---
   let g:ft = &ft
   let g:repl[g:ft] = {}
-  let g:repl[g:ft].binary = 'sh test/mock-repl.sh'
+  let g:repl[g:ft].bin = 'sh test/mock-repl.sh'
   let g:repl[g:ft].args = ['arg1', 'arg2']
   let g:repl[g:ft].syntax = g:ft
   let g:repl[g:ft].title = 'Mock REPL'
@@ -23,7 +23,7 @@ Execute (No arguments opens a default prompt):
 Then (A terminal buffer with settings set):
   Assert exists('b:repl["-"]')
   AssertEqual g:repl[g:ft].syntax, &syntax
-  AssertEqual g:repl[g:ft].binary, b:repl['-'].binary
+  AssertEqual g:repl[g:ft].bin, b:repl['-'].bin
   AssertEqual g:repl[g:ft].title, b:term_title
   AssertEqual g:repl[g:ft].args, b:repl['-'].args
   AssertEqual b:repl['-'], g:repl[g:ft].instances[0]

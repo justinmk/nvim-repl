@@ -30,26 +30,26 @@ endif
 " ----------------------------------------------------------------------------
 " The default settings
 " ----------------------------------------------------------------------------
-" binary : Which REPL binary to execute
+" bin    : Which REPL binary to execute
 " args   : Arguments to pass to every execution, come before user arguments
 " syntax : Syntax highlighting to use for the REPL buffer
 " title  : Value of b:term_title
 " ----------------------------------------------------------------------------
 let s:repl = {
 	\ 'guile' : {
-		\ 'binary': 'guile',
+		\ 'bin': 'guile',
 		\ 'args': ['-L', '.'],
 		\ 'syntax': 'scheme',
 		\ 'title': 'Guile REPL',
 	\ },
 	\ 'python' : {
-		\ 'binary': 'python',
+		\ 'bin': 'python',
 		\ 'args': [],
 		\ 'syntax': '',
 		\ 'title': 'Python REPL',
 	\ },
 	\ 'sh' : {
-		\ 'binary': 'sh',
+		\ 'bin': 'sh',
 		\ 'args': [],
 		\ 'syntax': '',
 		\ 'title': 'Bourne Shell',

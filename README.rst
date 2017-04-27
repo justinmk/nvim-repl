@@ -79,7 +79,7 @@ looks like:
 .. code-block:: vim
 
    let g:repl['python'] = {
-       \'binary': 'python',
+       \ 'bin': 'python',
        \ 'args': [],
        \ 'syntax': '',
        \ 'title': 'Python REPL

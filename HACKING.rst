@@ -51,10 +51,10 @@ setup:
 .. code-block:: vim
 
    " Use GNU Guile as the Scheme interpreter every time
-   let g:repl = {'scheme' : {'binary': 'guile'}}
+   let g:repl = {'scheme' : {'bin': 'guile'}}
 
    " Except for this buffer use Chibi-Scheme
-   let b:repl = {'scheme' : {'binary': 'chibi-scheme'}}
+   let b:repl = {'scheme' : {'bin': 'chibi-scheme'}}
 
 This assembly is performed inside the `s:repl()` function. When the script is
 loaded only the global settings are assembled. Here is how it is done:
