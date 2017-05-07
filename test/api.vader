@@ -62,3 +62,16 @@ Execute (Throwing an error when re-defining a REPL):
 
 Then (The settings are unchanged):
   AssertThrows call repl#define_repl('foo', {'bin', ''}, 'error')
+
+
+#-- repl#spawn ---------------------------------------------------------------
+Execute (Spawning a new buffer with settings):
+  let foo = {'bin': '', 'args': [], 'syntax': '', 'title': ''}
+  let instance = repl#spawn('', foo, 'foo')
+
+Then (The instance has the right entries):
+  let buffer = nvim_get_current_buf()
+  let job = b:terminal_job_id
+  let expect = {'type': 'foo', 'bin': '', 'args': [], 'job_id': job, 'buffer': buffer}
+
+  AssertEqual expect, instance

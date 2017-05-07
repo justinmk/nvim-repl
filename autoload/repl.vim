@@ -27,7 +27,7 @@
 "  Guess the file type based on a file type string.
 "
 "  Arguments:
-"    a:ft  File type string, such as 'python' or 'scheme.guile'
+"    ft  File type string, such as 'python' or 'scheme.guile'
 "
 "  Returns:
 "    The guessed type
@@ -62,9 +62,12 @@ endfunction
 "  Define a new REPL for a given type.
 "
 "  Arguments:
-"    a:type   Type of the REPL to define
-"    a:repl   Dictionary containing the repl information
-"    a:force  Either "keep", "force" or "error"; see third arg of extend()
+"    type   Type of the REPL to define
+"    repl   Dictionary containing the repl information
+"    force  Either "keep", "force" or "error"; see third arg of extend()
+"
+"  Returns:
+"    Handle to the REPL buffer
 "
 "  If the REPL does not exist it is added as a new REPL. If it does exists its
 "  settings are merged with the new one according to 'a:force'.
@@ -77,3 +80,39 @@ function! repl#define_repl(type, repl, force)
 
 	call extend(g:repl[a:type], a:repl, a:force)
 endf
+
+
+" ----------------------------------------------------------------------------
+"  Open a new REPL buffer with the given options
+"
+"  Arguments:
+"    mods  Modifiers like `:vert`
+"    repl  Dictionary of REPL settings
+"    type  Type of the REPL
+"
+"  Returns:
+"    Handle to the REPL buffer
+"
+" This function is responsible for opening a new buffer, launching the REPL
+" process and setting it up. It does not depend on state, but the opening of a
+" new buffer is a side effect. It does not mutate the value of `g:repl`.
+" ----------------------------------------------------------------------------
+function! repl#spawn(mods, repl, type)
+	" Open a new buffer and launch the terminal
+	silent execute a:mods 'new'
+	silent execute 'terminal' a:repl.bin join(a:repl.args, ' ')
+	silent execute 'set syntax='.a:repl.syntax
+	silent let b:term_title = a:repl.title
+
+	let b:repl = {
+		\ '-': {
+			\ 'type'   : a:type,
+			\ 'bin'    : a:repl.bin,
+			\ 'args'   : a:repl.args,
+			\ 'job_id' : b:terminal_job_id,
+			\ 'buffer' : nvim_get_current_buf()
+		\ }
+	\ }
+
+	return b:repl['-']
+endfunction

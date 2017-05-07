@@ -31,6 +31,8 @@ Part I - User manual~
 
 Part II - API reference~
    guess_type ........................................... |repl#guess_type()|
+   define_repl .......................................... |repl#define_repl()|
+   spawn ................................................ |repl#spawn()|
 
 ==============================================================================
 INTRODUCTION                                          *repl.nvim-introduction*
@@ -364,6 +366,25 @@ overriding existing options:
     call repl#define_repl('python', {'bin': 'python3'}, 'force')
 <
 This will change the binary, but leave other options as they are.
+
+
+------------------------------------------------------------------------------
+repl#spawn({mods}, {repl}, {type})                              *repl#spawn()*
+
+Open a new REPL buffer with the given options. This is the default function to
+be called when a REPL is instantiated.
+
+ Arguments:~
+   {mods}  Modifiers like `:vert`
+   {repl}  Dictionary of REPL settings
+   {type}  Type of the REPL
+
+ Returns:~
+   {Handle} to the REPL buffer
+
+This function is responsible for opening a new buffer, launching the REPL
+process and setting it up. It does not depend on state, but the opening of a
+new buffer is a side effect. It does not mutate the value of `g:repl`.
 
 ------------------------------------------------------------------------------
 

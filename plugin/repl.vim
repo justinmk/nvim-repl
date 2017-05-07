@@ -108,42 +108,47 @@ function! s:repl(mods, bang, ...)
 	" first argument, that is the file type)
 	let l:repl.args = l:repl.args + a:000[1:]
 
-	" Open a new buffer and launch the terminal
-	silent execute a:mods 'new'
-	silent execute 'terminal' l:repl.bin join(l:repl.args, ' ')
-	silent execute 'set syntax='.l:repl.syntax
-	silent let b:term_title = l:repl.title
+	let l:instance = repl#spawn(a:mods, l:repl, l:type)
 
-	" Collect information about this REPL instance
-	let b:repl = {
-		\ '-': {
-			\ 'type'   : l:type,
-			\ 'bin'    : l:repl.bin,
-			\ 'args'   : l:repl.args,
-			\ 'job_id' : b:terminal_job_id,
-			\ 'buffer' : bufnr('%')
-		\ }
-	\ }
+	call s:register_instance(l:instance)
+endfunction
 
+
+
+" ============================================================================
+" API CANDIDATES: These functions might in the future be promoted to actual
+" API functions, that is why they have been factored into standalone functions
+" even though they are used only once.
+" ============================================================================
+
+" ----------------------------------------------------------------------------
+" Registers a REPL instance on the stack of instances
+"
+" Arguments:
+"   instance  Dictionary containing information about the instance
+" ----------------------------------------------------------------------------
+function! s:register_instance(instance)
 	" Add This instance to the top of the list of instances
-	if has_key(g:repl[l:type], 'instances')
-		call insert(g:repl[l:type].instances, b:repl['-'])
+	if has_key(g:repl[a:instance.type], 'instances')
+		call insert(g:repl[a:instance.type].instances, a:instance)
 	else
-		let g:repl[l:type].instances = [b:repl['-']]
+		let g:repl[a:instance.type].instances = [a:instance]
 	endif
 
 	" Hook up autocommand to clean up after the REPL terminates; the
-	" autocommand is not guaranteed to have access to the b:repl variable,
+	" autocommand is not guaranteed to have access to the instance variable,
 	" that's why we instead use the literal job-id to identify this instance.
-	silent execute 'au BufDelete <buffer> call <SID>remove_instance('. b:repl['-'].job_id .', "'.l:type.'")'
+	let l:type = a:instance.type
+	let l:job  = a:instance.job_id
+	silent execute 'au BufDelete <buffer> call <SID>remove_instance('.job.', "'.type.'")'
 endfunction
-
 
 " ----------------------------------------------------------------------------
 " Remove an instance from the global list of instances
 "
-"   - a:job_id   Job ID of the REPL process, used to find the REPL instance
-"   - a:type     The type of REPL
+" Arguments:
+"   job_id   Job ID of the REPL process, used to find the REPL instance
+"   type     The type of REPL
 " ----------------------------------------------------------------------------
 function! s:remove_instance(job_id, type)
 	for i in range(len(g:repl[a:type].instances))
