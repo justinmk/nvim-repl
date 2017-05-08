@@ -138,9 +138,9 @@ instead of deciding ahead of time.
 Note  After Nvim has loaded up do not re-assign the `g:repl` variable, set its
       individual entries instead.
 
-It is also possible to specify local setting by using one of the scopes `t:`, `w:`
-or `b:`, with later ones taking precedence. The following is a listing of the
-default settings.
+It is also possible to specify local settings by using one of the scopes `t:`,
+`w:` or `b:`, with later ones taking precedence. The following is a listing of
+the default settings.
 
 Note  The |repl#define_repl()| function provides a safe way of defining or
       modifying the entries of `g:repl`.
@@ -158,16 +158,23 @@ before the user-supplied arguments.
 
 ------------------------------------------------------------------------------
 g:repl['type']['syntax']                            *g:repl['type']['syntax']*
-Default: 'scheme'~
 
 Which syntax highlighting to use for the REPL. Use the empty string if you
 wish to disable syntax highlighting.
 
 ------------------------------------------------------------------------------
-:repl['type']['title']                               *g:repl['type']['title']*
-Default: 'Guile REPL'~
+g:repl['type']['title']                              *g:repl['type']['title']*
 
 The value used for the terminal buffer's `b:term_title` variable.
+
+------------------------------------------------------------------------------
+g:repl['type']['spawn']                              *g:repl['type']['spawn']*
+
+Optional, defaults to |repl#spawn()|; this function opens a new buffer and
+sets up the REPL process. See |repl#spawn()| for details.
+
+This option is intended for REPLs which do something special, like not using
+the terminal. For most REPLs the default is exactly what you want to use.
 
 
 ==============================================================================

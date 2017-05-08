@@ -109,7 +109,11 @@ function! s:repl(mods, bang, ...)
 	" first argument, that is the file type)
 	let l:repl.args = l:repl.args + a:000[1:]
 
-	let l:instance = repl#spawn(a:mods, l:repl, l:type)
+	if has_key(l:repl, 'spawn')
+		let l:instance = l:repl.spawn(a:mods, l:repl, l:type)
+	else
+		let l:instance = repl#spawn(a:mods, l:repl, l:type)
+	endif
 
 	call s:register_instance(l:instance)
 endfunction
