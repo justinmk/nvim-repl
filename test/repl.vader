@@ -36,6 +36,7 @@ Execute (User-supplied arguments):
 
 Then (Arugments are appended to defaults):
   AssertEqual b:repl['-'].args, g:repl[g:ft].args + ['foo', 'bar']
+  quit
 
 
 #-----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ Execute (Function reference settings):
 
 Then (Function reference gets evaluated):
   AssertEqual 'foo_syntax', &syntax
+  quit
 
 
 #-----------------------------------------------------------------------------

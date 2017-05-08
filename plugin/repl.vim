@@ -74,13 +74,14 @@ function! s:repl(mods, bang, ...)
 	if empty(a:bang) && has_key(g:repl[l:type], 'instances') && len(g:repl[l:type].instances) > 0
 		" Always use the youngest instance
 		let l:buffer = g:repl[l:type].instances[0].buffer
-		let l:windows = win_findbuf(l:buffer)
+		let l:windows = nvim_list_wins()
+		let l:windows = filter(l:windows, {i, v -> nvim_win_get_buf(v) == l:buffer})
 
 		if empty(l:windows)
 			silent execute a:mods 'new'
 			silent execute 'buffer' l:buffer
 		else
-			call win_gotoid(l:windows[0])
+			call nvim_set_current_win(l:windows[0])
 		endif
 
 		return
@@ -93,7 +94,7 @@ function! s:repl(mods, bang, ...)
 	for l:scope in ['t', 'w', 'b']
 		let l:local_settings = l:scope.':repl["'.l:type.'"]'
 		if exists(l:local_settings)
-			silent execut 'call extend(l:repl, '.l:local_settings.', "force")'
+			silent execute 'call extend(l:repl, '.l:local_settings.', "force")'
 		endif
 	endfor
 
