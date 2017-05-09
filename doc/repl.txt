@@ -7,13 +7,13 @@
              |  _ <| |___|  __/| |___ _| | | \ V /| | | | | | |~
              |_| \_\_____|_|   |_____(_)_| |_|\_/ |_|_| |_| |_|~
                                                   
-
 Author: Alejandro "HiPhish" Sanchez
 License: MIT License
 
 
 ==============================================================================
 TABLE OF CONTENTS                                         *repl.nvim-contents*
+------------------------------------------------------------------------------
 
 Part I - User manual~
    1. Introduction ...................................... |repl.nvim-intro|
@@ -26,6 +26,8 @@ Part I - User manual~
       7.1 Bourne Shell .................................. |repl.nvim-sh|
       7.2 GNU Guile ..................................... |repl.nvim-guile|
       7.3 Python ........................................ |repl.nvim-python|
+      7.4 R7RS .......................................... |repl.nvim-r7rs|
+      7.5 Scheme......................................... |repl.nvim-scheme|
    8. Defining new REPLs ................................ |repl.nvim-defining|
    9. API ............................................... |repl.nvim-api|
 
@@ -34,24 +36,33 @@ Part II - API reference~
    define_repl .......................................... |repl#define_repl()|
    spawn ................................................ |repl#spawn()|
 
+
+
 ==============================================================================
 INTRODUCTION                                          *repl.nvim-introduction*
+------------------------------------------------------------------------------
 
 REPL.nvim provides quick, easy and customisable access to a REPL independent
 of language by wrapping itself around Nvim's terminal emulator. This allows
 for a quick and fully functional REPL from inside Nvim, but editing text is
 limited to the REPL's own interface.
 
+
+
 ==============================================================================
 SETUP                                                        *repl.nvim-setup*
+------------------------------------------------------------------------------
 
 The plugin itself is installed like any other Vim plugin. In addition need to
 have the REPL you want to use installed. It does not matter how or where the
 binary is located, you can change the setting, but the default is to use the
 system's command.
 
+
+
 ==============================================================================
 RUNNING A REPL                                               *repl.nvim-setup*
+------------------------------------------------------------------------------
 
 :Repl [{type} [{arg} ...]]                                             *:Repl*
 
@@ -82,8 +93,10 @@ If there is already one or more instances running the command will move the
 cursor to the REPL window. To explicitly spawn a new instance use `:Repl!`.
 
 
+
 ==============================================================================
 MAPPINGS                                                  *repl.nvim-mappings*
+------------------------------------------------------------------------------
 
 The following key mappings are available. If no REPL instance is available a
 new REPL will be spawned. These mappings will switch the current window to the
@@ -111,39 +124,33 @@ Send the current line to the REPL. This is a convenience for mapping for the
 sequence `<Plug>(ReplSend)_` in case you have remapped `_`.
 
 
+
 ==============================================================================
 CONFIGURATION                                        *repl.nvim-configuration*
                                                                       *g:repl*
                                                                       *t:repl*
                                                                       *w:repl*
                                                                       *b:repl*
+------------------------------------------------------------------------------
 
 All settings are contained inside the `g:repl['type']` dictionary, where
 'type' is the type of the REPL. The key is the name of the setting and its
-value is the value or a function reference. You can set individual entries
-according to your wishes; if you wanted to disable syntax highlighting in the
-REPL you would add the following to your `init.vim`:
+value is the value. You can use the |repl#define_repl()| function to define a
+new REPL or override the settings of an existing one. The settings are passed
+as a dictionary like this:
 >
-    let g:repl['python'] = {'syntax': ''}
+    call repl#define_repl('python', {'syntax': ''}, 'force')
 <
-You do not have to add the default settings to your dictionary, this plugin is
-smart enough to not lose the defaults.
-
-Settings are allowed to be a function reference (or a lambda) to a function
-which takes no arguments. This allows you to dynamically generate settings
-instead of deciding ahead of time.
->
-    let g:repl['python'] = {'syntax': {-> ''}}
-<
-Note  After Nvim has loaded up do not re-assign the `g:repl` variable, set its
-      individual entries instead.
+Here we turn off syntax highlighting for Python REPL buffers. We `'force'`
+this setting in order to override whatever the default setting might be.
 
 It is also possible to specify local settings by using one of the scopes `t:`,
-`w:` or `b:`, with later ones taking precedence. The following is a listing of
-the default settings.
-
-Note  The |repl#define_repl()| function provides a safe way of defining or
-      modifying the entries of `g:repl`.
+`w:` or `b:` as the scope for the `repl` dictionary, with later scopes taking
+precedence.
+>
+    " Turn off syntax highlighting for any REPL from this tab page
+    let t:repl = {'python': {'syntax': ''}}
+<
 
 ------------------------------------------------------------------------------
 g:repl['type']['bin']                                  *g:repl['type']['bin']*
@@ -177,8 +184,10 @@ This option is intended for REPLs which do something special, like not using
 the terminal. For most REPLs the default is exactly what you want to use.
 
 
+
 ==============================================================================
 MANAGING REPL INSTANCES                                      *repl.nvim-setup*
+------------------------------------------------------------------------------
 
 The plugin keeps track of running REPL instances, allowing you to have more
 than one per type running at any time. Instances form a sort of stack with
@@ -211,8 +220,10 @@ Note  The instance is stored under the key `'-'` because that is a reserved
       key which will never name-collide with any existing REPL type.
 
 
+
 ==============================================================================
 INCLUDED REPL TYPES                                        *repl.nvim-builtin*
+------------------------------------------------------------------------------
 
 The following REPL types are defined out of the box. The change their default
 settings see |repl.nvim-config|.
@@ -292,8 +303,10 @@ BOURNE SHELL                                                    *repl.nvim-sh*
 The Bourne shell is basically like executing the |:terminal| command.
 
 
+
 ==============================================================================
 DEFINING NEW REPL TYPES                                      *repl.nvim-setup*
+------------------------------------------------------------------------------
 
 Plugin authors can define new types of REPL to integrate with REPL.nvim as
 standalone plugins. You must define a dictionary for the new REPL type that
@@ -317,6 +330,7 @@ the normal plugin files, e.g. by putting it inside the |after-directory|.
 
 ==============================================================================
 API                                                            *repl.nvim-api*
+------------------------------------------------------------------------------
 
 The API provides users with a public interface to control REPL.nvim from a
 higher level. You can use the API with your own configuration or to provide

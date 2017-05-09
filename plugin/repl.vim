@@ -98,13 +98,6 @@ function! s:repl(mods, bang, ...)
 		endif
 	endfor
 
-	" If an option is a function reference call it.
-	for l:key in keys(l:repl)
-		if type(l:repl[l:key]) == type(function('type'))
-			let l:repl[l:key] = l:repl[l:key]()
-		endif
-	endfor
-
 	" Append the argument to the command to the argument list (but skip the
 	" first argument, that is the file type)
 	let l:repl.args = l:repl.args + a:000[1:]
