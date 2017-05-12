@@ -58,8 +58,10 @@ function! repl#guess_type(ft)
 endfunction
 
 
-" ----------------------------------------------------------------------------
 "  Define a new REPL for a given type.
+"  It is merged with the "-" REPL type.
+"  If the REPL does not exist it is added as a new REPL. If it does exists its
+"  settings are merged with the new one according to 'a:force'.
 "
 "  Arguments:
 "    type   Type of the REPL to define
@@ -68,17 +70,16 @@ endfunction
 "
 "  Returns:
 "    Handle to the REPL buffer
-"
-"  If the REPL does not exist it is added as a new REPL. If it does exists its
-"  settings are merged with the new one according to 'a:force'.
-" ----------------------------------------------------------------------------
 function! repl#define_repl(type, repl, force)
+  " Merge with the "-" (default) type.
+  let r = extend(deepcopy(g:repl['-']), a:repl, "force")
+
   if !has_key(g:repl, a:type)
-    let g:repl[a:type] = a:repl
+    let g:repl[a:type] = r
     return
   endif
 
-  call extend(g:repl[a:type], a:repl, a:force)
+  call extend(g:repl[a:type], r, a:force)
 endf
 
 

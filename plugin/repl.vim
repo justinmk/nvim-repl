@@ -102,13 +102,6 @@ function! s:repl(mods, bang, ...)
 endfunction
 
 
-
-" ============================================================================
-" API CANDIDATES: These functions might in the future be promoted to actual
-" API functions, that is why they have been factored into standalone functions
-" even though they are used only once.
-" ============================================================================
-
 " ----------------------------------------------------------------------------
 " Registers a REPL instance on the stack of instances
 "
@@ -168,8 +161,7 @@ function! s:send_to_repl(type, ...) range
   endif
 
   call jobsend(g:repl[&ft].instances[0].job_id, l:text)
-  Repl
-  startinsert
+  call jobsend(g:repl[&ft].instances[0].job_id, g:repl[&ft]['enter'])
 endfunction
 
 
@@ -226,12 +218,16 @@ let s:repl['r7rs'] = copy(s:repl['r7rs-small'])
 let s:repl['scheme'] = copy(s:repl['r7rs-small'])
 " ----------------------------------------------------------------------------
 
-" Build a dictionary to hold global setting if there is none
-if !exists('g:repl')
-  let g:repl = {}
-endif
+" Initialize g:repl.
+let g:repl = get(g:, 'repl', {})
 
-" Assign the default options, respect user settings
+" Initialize the "-" (default) REPL type.
+let s:repl_default = {
+  \'enter': "\n",
+  \}
+let g:repl['-'] = extend(s:repl_default, get(g:repl, '-', {}), "force")
+
+" Initialize REPL types.
 for s:type in keys(s:repl)
   call repl#define_repl(s:type, s:repl[s:type], 'keep')
 endfor
