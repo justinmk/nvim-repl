@@ -28,12 +28,17 @@ function! PythonSourceLines(lines)
 endfunction
 
 let b:cmdline_nl = "\n"
-let b:cmdline_app = "python"
-let b:cmdline_quit_cmd = "quit()"
+let b:repl = "python"
 let b:cmdline_source_fun = function("PythonSourceLines")
 let b:cmdline_send_empty = 1
-let b:cmdline_filetype = "python"
 
-exe 'nmap <buffer><silent> ' . g:cmdline_map_start . ' :call VimCmdLineStartApp()<CR>'
-
-call VimCmdLineSetApp("python")
+if exists("g:repl")
+    for key in keys(g:repl)
+        if key == "python" && g:repl["python"]['bin'] == "ipython"
+            echohl WarningMsg
+            echomsg "vimcmdline does not support ipython"
+            sleep 3
+            echohl Normal
+        endif
+    endfor
+endif

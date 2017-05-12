@@ -15,47 +15,20 @@
 " Author: Jakson Alves de Aquino <jalvesaq@gmail.com>
 "==========================================================================
 
-if exists("g:did_cmdline")
+if exists("g:loaded_vimcmdline")
     finish
 endif
-let g:did_cmdline = 1
+let g:loaded_vimcmdline = 1
 
-" Set option
-if has("nvim")
-    if !exists("g:cmdline_in_buffer")
-        let g:cmdline_in_buffer = 1
-    endif
-else
-    let g:cmdline_in_buffer = 0
-endif
-
-" Set other options
-if !exists("g:cmdline_vsplit")
-    let g:cmdline_vsplit = 0
-endif
-if !exists("g:cmdline_esc_term")
-    let g:cmdline_esc_term = 1
-endif
-if !exists("g:cmdline_term_width")
-    let g:cmdline_term_width = 40
-endif
-if !exists("g:cmdline_term_height")
-    let g:cmdline_term_height = 15
-endif
-if !exists("g:cmdline_tmp_dir")
-    let g:cmdline_tmp_dir = "/tmp/cmdline_" . $USER
-endif
-if !exists("g:cmdline_outhl")
-    let g:cmdline_outhl = 1
-endif
+let g:cmdline_vsplit = get(g:, 'cmdline_vsplit', 0)
+let g:cmdline_term_width = get(g:, 'cmdline_term_width', 40)
+let g:cmdline_term_height = get(g:, 'cmdline_term_height', 15)
+let g:cmdline_tmp_dir = get(g:,'cmdline_tmp_dir', expand('~').'/.local/share/nvim/repl')
 
 " Internal variables
 let g:cmdline_job = {"haskell": 0, "julia": 0, "lisp": 0, "matlab": 0,
             \ "prolog": 0, "python": 0, "ruby": 0, "sh": 0, "javascript": 0}
 let g:cmdline_termbuf = {"haskell": "", "julia": "", "lisp": "", "matlab": "",
-            \ "prolog": "", "python": "", "ruby": "", "sh": "", "javascript": ""}
-let s:cmdline_app_pane = ''
-let g:cmdline_tmuxsname = {"haskell": "", "julia": "", "lisp": "", "matlab": "",
             \ "prolog": "", "python": "", "ruby": "", "sh": "", "javascript": ""}
 
 " Skip empty lines
@@ -76,93 +49,10 @@ function s:GoLineDown()
     endwhile
 endfunction
 
-" Adapted from screen plugin:
-function GetTmuxActivePane()
-  let line = system("tmux list-panes | grep \'(active)$'")
-  let paneid = matchstr(line, '\v\%\d+ \(active\)')
-  if !empty(paneid)
-    return matchstr(paneid, '\v^\%\d+')
-  else
-    return matchstr(line, '\v^\d+')
-  endif
-endfunction
-
-function VimCmdLineStart_ExTerm(app)
-    " Check if the REPL application is already running
-    if g:cmdline_tmuxsname[b:cmdline_filetype] != ""
-        let tout = system("tmux -L VimCmdLine has-session -t " . g:cmdline_tmuxsname[b:cmdline_filetype])
-        if tout =~ "VimCmdLine" || tout =~ g:cmdline_tmuxsname[b:cmdline_filetype]
-            unlet g:cmdline_tmuxsname[b:cmdline_filetype]
-        else
-            echohl WarningMsg
-            echo 'Tmux session with "' . b:cmdline_app . '" is already running.'
-            echohl Normal
-            return
-        endif
-    endif
-
-    let g:cmdline_tmuxsname[b:cmdline_filetype] = "vcl" . localtime()
-
-    let cnflines = ['set-option -g prefix C-a',
-                \ 'unbind-key C-b',
-                \ 'bind-key C-a send-prefix',
-                \ 'set-window-option -g mode-keys vi',
-                \ 'set -g status off',
-                \ 'set -g default-terminal "screen-256color"',
-                \ "set -g terminal-overrides 'xterm*:smcup@:rmcup@'" ]
-    if g:cmdline_external_term_cmd =~ "rxvt" || g:cmdline_external_term_cmd =~ "urxvt"
-        let cnflines = cnflines + [
-                    \ "set terminal-overrides 'rxvt*:smcup@:rmcup@'" ]
-    endif
-    call writefile(cnflines, g:cmdline_tmp_dir . "/tmux.conf")
-
-
-    let cmd = printf(g:cmdline_external_term_cmd,
-                \ 'tmux -2 -f "' . g:cmdline_tmp_dir . '/tmux.conf' .
-                \ '" -L VimCmdLine new-session -s ' . g:cmdline_tmuxsname[b:cmdline_filetype] . ' ' . a:app)
-    call system(cmd)
-endfunction
-
-" Run the interpreter in a Tmux panel
-function VimCmdLineStart_Tmux(app)
-    " Check if Tmux is running
-    if $TMUX == ""
-        echohl WarningMsg
-        echomsg "Cannot start interpreter because not inside a Tmux session."
-        echohl Normal
-        return
-    endif
-
-    let g:cmdline_vim_pane = GetTmuxActivePane()
-    let tcmd = "tmux split-window "
-    if g:cmdline_vsplit
-        if g:cmdline_term_width == -1
-            let tcmd .= "-h"
-        else
-            let tcmd .= "-h -l " . g:cmdline_term_width
-        endif
-    else
-        let tcmd .= "-l " . g:cmdline_term_height
-    endif
-    let tcmd .= " " . a:app
-    let slog = system(tcmd)
-    if v:shell_error
-        exe 'echoerr ' . slog
-        return
-    endif
-    let s:cmdline_app_pane = GetTmuxActivePane()
-    let slog = system("tmux select-pane -t " . g:cmdline_vim_pane)
-    if v:shell_error
-        exe 'echoerr ' . slog
-        return
-    endif
-endfunction
-
-" Run the interpreter in a Neovim terminal buffer
 function VimCmdLineStart_Nvim(app)
     let edbuf = bufname("%")
-    let thisft = b:cmdline_filetype
-    if g:cmdline_job[b:cmdline_filetype]
+    let thisft = &filetype
+    if g:cmdline_job[&filetype]
         return
     endif
     set switchbuf=useopen
@@ -181,91 +71,30 @@ function VimCmdLineStart_Nvim(app)
     endif
     let g:cmdline_job[thisft] = termopen(a:app, {'on_exit': function('s:VimCmdLineJobExit')})
     let g:cmdline_termbuf[thisft] = bufname("%")
-    if g:cmdline_esc_term
-        tnoremap <buffer> <Esc> <C-\><C-n>
-    endif
-    if g:cmdline_outhl
-        exe 'runtime syntax/cmdlineoutput_' . a:app . '.vim'
-    endif
+    exe 'runtime syntax/cmdlineoutput_' . a:app . '.vim'
     exe "sbuffer " . edbuf
     stopinsert
 endfunction
 
-function VimCmdLineCreateMaps()
-    exe 'nmap <silent><buffer> ' . g:cmdline_map_send . ' :call VimCmdLineSendLine()<CR>'
-    exe 'nmap <silent><buffer> ' . g:cmdline_map_send_and_stay . ' :call VimCmdLineSendLineAndStay()<CR>'
-    if exists("b:cmdline_source_fun")
-        exe 'vmap <silent><buffer> ' . g:cmdline_map_send .
-                    \ ' <Esc>:call b:cmdline_source_fun(getline("' . "'" . '<", "'. "'". '>"))<CR>'
-        exe 'nmap <silent><buffer> ' . g:cmdline_map_source_fun .
-                    \ ' :call b:cmdline_source_fun(getline(1, "$"))<CR>'
-        exe 'nmap <silent><buffer> ' . g:cmdline_map_send_paragraph .
-                    \ ' :call VimCmdLineSendParagraph()<CR>'
-        exe 'nmap <silent><buffer> ' . g:cmdline_map_send_block .
-                    \ ' :call VimCmdLineSendMBlock()<CR>'
-    endif
-    if exists("b:cmdline_quit_cmd")
-        exe 'nmap <silent><buffer> ' . g:cmdline_map_quit . ' :call VimCmdLineQuit("' . b:cmdline_filetype . '")<CR>'
-    endif
-endfunction
-
-" Common procedure to start the interpreter
 function VimCmdLineStartApp()
-    if !exists("b:cmdline_app")
-        echomsg 'There is no application defined to be executed for file of type "' . b:cmdline_filetype . '".'
+    if !exists("b:repl")
+        echomsg 'Missing b:repl'
         return
     endif
 
-    call VimCmdLineCreateMaps()
-
-    if !isdirectory(g:cmdline_tmp_dir)
-        call mkdir(g:cmdline_tmp_dir)
-    endif
-
-    if exists("g:cmdline_external_term_cmd")
-        call VimCmdLineStart_ExTerm(b:cmdline_app)
-    else
-        if g:cmdline_in_buffer
-            call VimCmdLineStart_Nvim(b:cmdline_app)
-        else
-            call VimCmdLineStart_Tmux(b:cmdline_app)
-        endif
-    endif
+    call mkdir(g:cmdline_tmp_dir, 'p')
+    call VimCmdLineStart_Nvim(b:repl)
+    call VimCmdLineSetApp(&filetype)
 endfunction
 
-" Send a single line to the interpreter
+" Send a single line to the REPL
 function VimCmdLineSendCmd(...)
-    if g:cmdline_job[b:cmdline_filetype]
-        call jobsend(g:cmdline_job[b:cmdline_filetype], a:1 . b:cmdline_nl)
-    else
-        let str = substitute(a:1, "'", "'\\\\''", "g")
-        if str =~ '^-'
-            let str = ' ' . str
-        endif
-        if exists("g:cmdline_external_term_cmd") && g:cmdline_tmuxsname[b:cmdline_filetype] != ""
-            let scmd = "tmux -L VimCmdLine set-buffer '" . str .
-                        \ "\<C-M>' && tmux -L VimCmdLine paste-buffer -t " . g:cmdline_tmuxsname[b:cmdline_filetype] . '.0'
-            call system(scmd)
-            if v:shell_error
-                echohl WarningMsg
-                echomsg 'Failed to send command. Is "' . b:cmdline_app . '" running?'
-                echohl Normal
-                unlet g:cmdline_tmuxsname[b:cmdline_filetype]
-            endif
-        elseif s:cmdline_app_pane != ''
-            let scmd = "tmux set-buffer '" . str . "\<C-M>' && tmux paste-buffer -t " . s:cmdline_app_pane
-            call system(scmd)
-            if v:shell_error
-                echohl WarningMsg
-                echomsg 'Failed to send command. Is "' . b:cmdline_app . '" running?'
-                echohl Normal
-                let s:cmdline_app_pane = ''
-            endif
-        endif
+    if g:cmdline_job[&filetype]
+        call jobsend(g:cmdline_job[&filetype], a:1 . b:cmdline_nl)
     endif
 endfunction
 
-" Send current line to the interpreter and go down to the next non empty line
+" Send current line to the REPL and go down to the next non empty line
 function VimCmdLineSendLine()
     let line = getline(".")
     if strlen(line) == 0 && b:cmdline_send_empty == 0
@@ -276,126 +105,42 @@ function VimCmdLineSendLine()
     call s:GoLineDown()
 endfunction
 
-" Send current line to the interpreter and but keep cursor on current line
-function VimCmdLineSendLineAndStay()
-    let line = getline(".")
-    if strlen(line) == 0 && b:cmdline_send_empty == 0
-        return
-    endif
-    call VimCmdLineSendCmd(line)
-endfunction
-
-function VimCmdLineSendParagraph()
-    let i = line(".")
-    let c = col(".")
-    let max = line("$")
-    let j = i
-    let gotempty = 0
-    while j < max
-        let j += 1
-        let line = getline(j)
-        if line =~ '^\s*$'
-            break
-        endif
-    endwhile
-    let lines = getline(i, j)
-    call b:cmdline_source_fun(lines)
-    if j < max
-        call cursor(j, 1)
-    else
-        call cursor(max, 1)
-    endif
-endfunction
-
 let s:all_marks = "abcdefghijklmnopqrstuvwxyz"
 
-function VimCmdLineSendMBlock()
-    let curline = line(".")
-    let lineA = 1
-    let lineB = line("$")
-    let maxmarks = strlen(s:all_marks)
-    let n = 0
-    while n < maxmarks
-        let c = strpart(s:all_marks, n, 1)
-        let lnum = line("'" . c)
-        if lnum != 0
-            if lnum <= curline && lnum > lineA
-                let lineA = lnum
-            elseif lnum > curline && lnum < lineB
-                let lineB = lnum
-            endif
-        endif
-        let n = n + 1
-    endwhile
-    if lineA == 1 && lineB == (line("$"))
-        echo "The file has no mark!"
-        return
-    endif
-    if lineB < line("$")
-        let lineB -= 1
-    endif
-    let lines = getline(lineA, lineB)
-    call b:cmdline_source_fun(lines)
-endfunction
-
-" Quit the interpreter
-function VimCmdLineQuit(ftype)
-    if exists("b:cmdline_quit_cmd")
-        call VimCmdLineSendCmd(b:cmdline_quit_cmd)
-        if g:cmdline_termbuf[a:ftype] != ""
-            exe "sb " . g:cmdline_termbuf[a:ftype]
-            startinsert
-            let g:cmdline_termbuf[a:ftype] = ""
-        endif
-        let g:cmdline_tmuxsname[a:ftype] = ""
-        let s:cmdline_app_pane = ''
-    else
-        echomsg 'Quit command not defined for file of type "' . a:ftype . '".'
-    endif
+function VimCmdLineQuit()
+  let bnr = bufnr(get(g:cmdline_termbuf, &filetype, v:null))
+  if bnr && 'terminal' ==# getbufvar(bnr, '&buftype')
+    exe 'bdelete! '.bnr
+    let g:cmdline_termbuf[&filetype] = v:null
+  endif
 endfunction
 
 " Register that the job no longer exists
 function s:VimCmdLineJobExit(job_id, data, etype)
-    for ftype in keys(g:cmdline_job)
-        if a:job_id == g:cmdline_job[ftype]
-            let g:cmdline_job[ftype] = 0
+    for ft in keys(g:cmdline_job)
+        if a:job_id == g:cmdline_job[ft]
+            let g:cmdline_job[ft] = 0
         endif
     endfor
 endfunction
 
 " Replace default application with custom one
-function VimCmdLineSetApp(ftype)
-    if exists("g:cmdline_app")
-        for key in keys(g:cmdline_app)
-            if key == a:ftype
-                let b:cmdline_app = g:cmdline_app[a:ftype]
+function VimCmdLineSetApp(ft)
+    if exists("g:repl")
+        for key in keys(g:repl)
+            if key == a:ft
+                let b:repl = g:repl[a:ft]
             endif
         endfor
     endif
-    if g:cmdline_job[b:cmdline_filetype] || g:cmdline_tmuxsname[b:cmdline_filetype] != "" || s:cmdline_app_pane != ''
-        call VimCmdLineCreateMaps()
-    endif
 endfunction
 
-" Default mappings
-if !exists("g:cmdline_map_start")
-    let g:cmdline_map_start = "<LocalLeader>s"
-endif
-if !exists("g:cmdline_map_send")
-    let g:cmdline_map_send = "<Space>"
-endif
-if !exists("g:cmdline_map_send_and_stay")
-    let g:cmdline_map_send_and_stay = "<LocalLeader><Space>"
-endif
-if !exists("g:cmdline_map_source_fun")
-    let g:cmdline_map_source_fun = "<LocalLeader>f"
-endif
-if !exists("g:cmdline_map_send_paragraph")
-    let g:cmdline_map_send_paragraph = "<LocalLeader>p"
-endif
-if !exists("g:cmdline_map_send_block")
-    let g:cmdline_map_send_block = "<LocalLeader>b"
-endif
-if !exists("g:cmdline_map_quit")
-    let g:cmdline_map_quit = "<LocalLeader>q"
-endif
+nnoremap <silent> <Plug>(repl_start) :<C-U>call VimCmdLineStartApp()<CR>
+nnoremap <silent> <Plug>(repl_quit) :call VimCmdLineQuit()<CR>
+nnoremap <silent> <Plug>(repl_send) :call VimCmdLineSendLine()<CR>
+xnoremap <silent> <Plug>(repl_send) <Esc>:call b:cmdline_source_fun(getline("'<", "'>"))<CR>
+
+nmap !r <Plug>(repl_start)
+nmap !q <Plug>(repl_quit)
+nmap yxx <Plug>(repl_send)
+xmap <Enter> <Plug>(repl_send)
