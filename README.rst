@@ -20,17 +20,6 @@ amount of control it gives users. The plugin is designed to make configuration
 as clean and simple as possible, to allow spawning any number of REPL instances
 and add any type of REPL the user wishes with minimal effort.
 
-
-Setup and quick start
-#####################
-
-Installation
-============
-
-Instal REPL.nvim like any other plugin. You will also need to have the binaries
-of the REPLs you want to use installed on your system.
-
-
 Starting a REPL
 ===============
 
@@ -114,37 +103,23 @@ local dictionary:
 Local dictionaries can be created at any time.
 
 
-Key mappings
-============
+Mappings
+========
 
-A new operator is available for sending text from the current buffer to the
-REPL. You will have to remap the keys for the new operator:
+An operator is available for sending text from the current buffer to the
+REPL. Define mappings to use it:
 
 .. code-block:: vim
 
    " Send the text of a motion to the REPL
-   nmap <leader>rs  <Plug>(ReplSend)
+   nmap yx <Plug>(ReplSend)
    " Send the current line to the REPL
-   nmap <leader>rss <Plug>(ReplSendLine)
-   nmap <leader>rs_ <Plug>(ReplSendLine)
+   nmap yxx <Plug>(ReplSendLine)
    " Send the selected text to the REPL
-   vmap <leader>rs  <Plug>(ReplSend)
+   xmap <Enter> <Plug>(ReplSend)
 
-With these mappings you could position your cursor inside a pair of
-parentheses, press `<leader>rsa)` and your expression would be sent over to the
-REPL with its parentheses.
-
-
-
-Shortcomings
-############
-
-Since REPL.nvim is implemented on top of Nvim's terminal emulator it is also
-bound to the same interface. You cannot use Vim's commands to edit text, you
-instead have to enter terminal mode (insert mode for the terminal) to modify
-text.
-
-
+Inside a pair of parentheses, press `yxa)` and the expression will be sent to
+the REPL.
 
 License
 #######

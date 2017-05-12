@@ -4,31 +4,10 @@
  Working on REPL.nvim
 ######################
 
-
-Code overview
-#############
-
-Here is the directory listing of important files::
-
-   ├─ plugin
-   │  ├─ repl.vim
-   │  ├─ repl-settings.vim
-   │  └─ repl-mappings.vim
-   │
-   └─ test
-      └─ …
-
-The `plugin/repl.vim` file contains all the important code. The `test`
-directory is for testing_.
-
-
-
 Building global REPL settings
 #############################
-:file: plugin/repl-settings.vim
 
-REPL.nvim uses dictionaries for settings. All settings are in one dictionary
-and the keys are the types of REPL. Here is an example:
+All settings are in one dictionary and the keys are the types of REPL. Example:
 
 .. code-block:: vim
 

@@ -36,25 +36,25 @@
 "    'nomatch'  No matching type was found
 " ----------------------------------------------------------------------------
 function! repl#guess_type(ft)
-	let l:fts = split(a:ft, '\v\.')
-	let l:type = ''
+  let l:fts = split(a:ft, '\v\.')
+  let l:type = ''
 
-	" Start with single types and gradually move to longer types, i.e.
-	" 'a', 'b', 'c', 'a.b', 'b.c', 'a.b.c'
-	for l:i in range(0, len(l:fts) - 1)
-		for l:j in range(0, len(l:fts) - l:i -1)
-			let l:ft = join(l:fts[l:j : l:j + l:i], '.')
-			if has_key(g:repl, l:ft)
-				let l:type = l:ft
-			endif
-		endfor
-	endfor
+  " Start with single types and gradually move to longer types, i.e.
+  " 'a', 'b', 'c', 'a.b', 'b.c', 'a.b.c'
+  for l:i in range(0, len(l:fts) - 1)
+    for l:j in range(0, len(l:fts) - l:i -1)
+      let l:ft = join(l:fts[l:j : l:j + l:i], '.')
+      if has_key(g:repl, l:ft)
+        let l:type = l:ft
+      endif
+    endfor
+  endfor
 
-	if empty(l:type)
-		throw 'nomatch'
-	endif
+  if empty(l:type)
+    throw 'nomatch'
+  endif
 
-	return l:type
+  return l:type
 endfunction
 
 
@@ -73,12 +73,12 @@ endfunction
 "  settings are merged with the new one according to 'a:force'.
 " ----------------------------------------------------------------------------
 function! repl#define_repl(type, repl, force)
-	if !has_key(g:repl, a:type)
-		let g:repl[a:type] = a:repl
-		return
-	endif
+  if !has_key(g:repl, a:type)
+    let g:repl[a:type] = a:repl
+    return
+  endif
 
-	call extend(g:repl[a:type], a:repl, a:force)
+  call extend(g:repl[a:type], a:repl, a:force)
 endf
 
 
@@ -98,21 +98,21 @@ endf
 " new buffer is a side effect. It does not mutate the value of `g:repl`.
 " ----------------------------------------------------------------------------
 function! repl#spawn(mods, repl, type)
-	" Open a new buffer and launch the terminal
-	silent execute a:mods 'new'
-	silent execute 'terminal' a:repl.bin join(a:repl.args, ' ')
-	silent execute 'set syntax='.a:repl.syntax
-	silent let b:term_title = a:repl.title
+  " Open a new buffer and launch the terminal
+  silent execute a:mods 'new'
+  silent execute 'terminal' a:repl.bin join(a:repl.args, ' ')
+  silent execute 'set syntax='.a:repl.syntax
+  silent let b:term_title = a:repl.title
 
-	let b:repl = {
-		\ '-': {
-			\ 'type'   : a:type,
-			\ 'bin'    : a:repl.bin,
-			\ 'args'   : a:repl.args,
-			\ 'job_id' : b:terminal_job_id,
-			\ 'buffer' : nvim_get_current_buf()
-		\ }
-	\ }
+  let b:repl = {
+    \ '-': {
+      \ 'type'   : a:type,
+      \ 'bin'    : a:repl.bin,
+      \ 'args'   : a:repl.args,
+      \ 'job_id' : b:terminal_job_id,
+      \ 'buffer' : nvim_get_current_buf()
+    \ }
+  \ }
 
-	return b:repl['-']
+  return b:repl['-']
 endfunction
