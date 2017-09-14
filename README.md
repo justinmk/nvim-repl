@@ -1,15 +1,16 @@
-# vimcmdline: Send lines to REPL
+# nvim-repl
 
-This is a fork of [vimcmdline](https://github.com/jalvesaq/vimcmdline).
-There's also a branch from https://gitlab.com/HiPhish/repl.nvim
+This is a fork of [vimcmdline](https://github.com/jalvesaq/vimcmdline)
+and https://gitlab.com/HiPhish/repl.nvim 
 
-Plan is to create a simplified/minimal REPL plugin using ideas/code from the two.
+It's not usable yet.
+The plan is to create a simplified/minimal REPL plugin using ideas/code from the two.
 
 ## Usage
 
-  - `!r` to start the REPL.
-  - `yxx` to send the current line to the REPL.
+  - `:Repl` to start the REPL.
   - `yx{motion}` to send text object to the REPL.
+  - `yxx` to send the current line to the REPL.
   - `{Visual}<Enter>` to send the selection to the REPL.
   - `!q` to quit the REPL.
 
