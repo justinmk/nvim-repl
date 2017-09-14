@@ -28,7 +28,7 @@ function! PythonSourceLines(lines)
 endfunction
 
 let b:cmdline_nl = "\n"
-let b:repl = "python"
+let b:repl['bin'] = "python"
 let b:cmdline_source_fun = function("PythonSourceLines")
 let b:cmdline_send_empty = 1
 

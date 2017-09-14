@@ -9,6 +9,6 @@ function! s:source(lines)
 endfunction
 
 let b:cmdline_nl = "\n"
-let b:repl = executable("stack") ? "stack ghci" : "ghci"
+let b:repl['bin'] = executable("stack") ? "stack ghci" : "ghci"
 let b:cmdline_source_fun = function("s:source")
 let b:cmdline_send_empty = 0

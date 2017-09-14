@@ -9,6 +9,6 @@ function! s:source(lines)
 endfunction
 
 let b:cmdline_nl = "\n"
-let b:repl = "swipl"
+let b:repl['bin'] = "swipl"
 let b:cmdline_source_fun = function("s:source")
 let b:cmdline_send_empty = 0

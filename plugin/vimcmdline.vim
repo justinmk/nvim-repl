@@ -129,7 +129,7 @@ function VimCmdLineSetApp(ft)
     if exists("g:repl")
         for key in keys(g:repl)
             if key == a:ft
-                let b:repl = g:repl[a:ft]
+                let b:repl['bin'] = g:repl[a:ft]
             endif
         endfor
     endif
