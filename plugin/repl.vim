@@ -186,12 +186,21 @@ endfunction
 " syntax : Syntax highlighting to use for the REPL buffer
 " title  : Value of b:term_title
 " ----------------------------------------------------------------------------
+let s:repl_default = {
+  \'enter': "\n",
+  \'title': "",
+  \}
 let s:repl = {
   \ 'guile': {
     \ 'bin': 'guile',
     \ 'args': ['-L', '.'],
     \ 'syntax': 'scheme',
     \ 'title': 'Guile REPL',
+  \ },
+  \ 'javascript': {
+    \ 'bin': 'node',
+    \ 'args': [],
+    \ 'syntax': 'javascript',
   \ },
   \ 'python': {
     \ 'bin': 'python',
@@ -222,9 +231,6 @@ let s:repl['scheme'] = copy(s:repl['r7rs-small'])
 let g:repl = get(g:, 'repl', {})
 
 " Initialize the "-" (default) REPL type.
-let s:repl_default = {
-  \'enter': "\n",
-  \}
 let g:repl['-'] = extend(s:repl_default, get(g:repl, '-', {}), "force")
 
 " Initialize REPL types.
