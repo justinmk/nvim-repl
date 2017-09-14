@@ -1,24 +1,17 @@
 # vimcmdline: Send lines to REPL
 
 This is a fork of [vimcmdline](https://github.com/jalvesaq/vimcmdline).
+There's also a branch from https://gitlab.com/HiPhish/repl.nvim
 
-This plugin sends lines from [Neovim](https://github.com/neovim/neovim) to
-a command line interpreter (REPL) running in a `:terminal`. It includes support
-for some filetypes; adding support for others is trivial. There is one instance
-of the REPL for each filetype.
-
-![nvim_running_octave](https://cloud.githubusercontent.com/assets/891655/7090493/5fba2426-df71-11e4-8eb8-f17668d9361a.png)
+Plan is to create a simplified/minimal REPL plugin using ideas/code from the two.
 
 ## Usage
 
   - `!r` to start the REPL.
   - `yxx` to send the current line to the REPL.
-  - `!q` to quit the REPL.
-
-For languages that can source chunks of code:
-
+  - `yx{motion}` to send text object to the REPL.
   - `{Visual}<Enter>` to send the selection to the REPL.
-  - `yx{motion}` to send a range of lines to the REPL.
+  - `!q` to quit the REPL.
 
 ## Configuration
 
