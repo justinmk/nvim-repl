@@ -1,68 +1,50 @@
-" Author: Alejandro "HiPhish" Sanchez
-" License:  The MIT License (MIT) {{{
-"    Copyright (c) 2017 HiPhish
-" 
-"    Permission is hereby granted, free of charge, to any person obtaining a
-"    copy of this software and associated documentation files (the
-"    "Software"), to deal in the Software without restriction, including
-"    without limitation the rights to use, copy, modify, merge, publish,
-"    distribute, sublicense, and/or sell copies of the Software, and to permit
-"    persons to whom the Software is furnished to do so, subject to the
-"    following conditions:
-" 
-"    The above copyright notice and this permission notice shall be included
-"    in all copies or substantial portions of the Software.
-" 
-"    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-"    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-"    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-"    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-"    USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
-
 if !has('nvim') || exists('g:loaded_repl')
   finish
 endif
 let g:loaded_repl = 1
 
-" ----------------------------------------------------------------------------
-" Called by the ':Repl' command
-"
-"   a:mods   Modifiers to the command like ':vert'
-"   a:bang   Bang attribute to the command, will be empty of no bang
-"   a:000    Arguments manually passed to the command
-" ----------------------------------------------------------------------------
-function! s:repl(mods, bang, ...)
-  " First we need to determine the REPL type. If there were no arguments
-  " passed or the first argument is '-' deduce the type from the current
-  " file type. Otherwise the type is the first argument.
-  let l:type = ''
-  if a:0 > 0 && a:1 !=? '-'
-    if has_key(g:repl, a:1)
-      let l:type = a:1
-    else
-      echohl ErrorMsg
-      echom 'No REPL of type '''.a:1.''' defined'
-      echohl None
-      return
-    endif
-  else
-    try
-      let l:type = repl#guess_type(&filetype)
-    catch
-      echohl ErrorMsg
-      echom 'No REPL for current file type defined'
-      echohl None
-      return
-    endtry
+let g:repl = get(g:, 'repl', {})
+let s:repl_default = { 'enter': "\n" }
+let g:repl['default'] = { 'enter': "\n" }
+
+" Copies the a:repl map to g:repl[a:type].
+function! s:extend_global_repl_map(type, repl)
+  " Merge with the default settings.
+  let r = extend(deepcopy(g:repl['default']), a:repl, 'force')
+
+  if !has_key(g:repl, a:type)
+    let g:repl[a:type] = r
+    return
   endif
+
+  call extend(g:repl[a:type], r)
+endf
+
+function! s:repl(mods, bang, ...)
+  " Determine the REPL type. If there were no arguments passed or the first
+  " argument is '-' deduce the type from the current file type. Otherwise the
+  " type is the first argument.
+  let type = &filetype
+  if a:0 > 0 && a:1 !=? '-'
+    if has_key(b:repl, a:1)
+      let type = a:1
+      " TODO: get b:repl settings for a:type ...
+    else
+      if !exists('b:repl')
+        echohl ErrorMsg
+        echom 'repl.vim: b:repl not defined for "'.&filetype.'" filetype'
+        echohl None
+        return
+      endif
+    endif
+  endif
+
+  call s:extend_global_repl_map(type, b:repl)
 
   " If the '!' was not supplied and there is already an instance running
   " jump to that instance.
   if empty(a:bang) && has_key(g:repl[l:type], 'instances') && len(g:repl[l:type].instances) > 0
-    " Always use the youngest instance
+    " Use the newest instance.
     let l:buffer = g:repl[l:type].instances[0].buffer
     let l:windows = nvim_list_wins()
     let l:windows = filter(l:windows, {i, v -> nvim_win_get_buf(v) == l:buffer})
@@ -77,10 +59,8 @@ function! s:repl(mods, bang, ...)
     return
   endif
 
-  " The actual option values to use are determined at runtime. Local
-  " settings take precedence, so we loop over the local scope from lowest to
-  " highest precedence.
-  let l:repl = copy(g:repl[l:type])
+  " Local settings take precedence.
+  let l:repl = b:repl
   for l:scope in ['t', 'w', 'b']
     let l:local_settings = l:scope.':repl["'.l:type.'"]'
     if exists(l:local_settings)
@@ -101,36 +81,24 @@ function! s:repl(mods, bang, ...)
   call s:register_instance(l:instance)
 endfunction
 
-
-" ----------------------------------------------------------------------------
-" Registers a REPL instance on the stack of instances
-"
-" Arguments:
-"   instance  Dictionary containing information about the instance
-" ----------------------------------------------------------------------------
-function! s:register_instance(instance)
-  " Add This instance to the top of the list of instances
-  if has_key(g:repl[a:instance.type], 'instances')
-    call insert(g:repl[a:instance.type].instances, a:instance)
+" Puts a REPL instance on the stack of instances
+function! s:register_instance(repl)
+  " Add this instance to the top of the list of instances
+  if has_key(g:repl[a:repl.type], 'instances')
+    call insert(g:repl[a:repl.type].instances, a:repl)
   else
-    let g:repl[a:instance.type].instances = [a:instance]
+    let g:repl[a:repl.type].instances = [a:repl]
   endif
 
-  " Hook up autocommand to clean up after the REPL terminates; the
-  " autocommand is not guaranteed to have access to the instance variable,
-  " that's why we instead use the literal job-id to identify this instance.
-  let l:type = a:instance.type
-  let l:job  = a:instance.job_id
-  silent execute 'au BufDelete <buffer> call <SID>remove_instance('.job.', "'.type.'")'
+  " Hook up autocommand to clean up after the REPL terminates; the autocommand
+  " is not guaranteed to have access to the instance variable, that's why we
+  " instead use the literal job-id to identify this instance.
+  let l:type = a:repl.type
+  let l:job  = a:repl.job_id
+  silent execute 'autocmd BufDelete <buffer> call <SID>remove_instance('.job.', "'.type.'")'
 endfunction
 
-" ----------------------------------------------------------------------------
-" Remove an instance from the global list of instances
-"
-" Arguments:
-"   job_id   Job ID of the REPL process, used to find the REPL instance
-"   type     The type of REPL
-" ----------------------------------------------------------------------------
+" Removes a REPL from the global list of instances
 function! s:remove_instance(job_id, type)
   for i in range(len(g:repl[a:type].instances))
     if g:repl[a:type].instances[i].job_id == a:job_id
@@ -168,75 +136,22 @@ endfunction
 function! s:range_selection(lower, upper, mod)
   let l:reg = getreg('"')
   let l:regtype = getregtype('"')
-
   silent execute "normal! ".a:lower.a:mod.a:upper.'y'
-
   let l:text = @"
-
   call setreg('"', l:reg, l:regtype)
-
   return l:text
 endfunction
 
-" ----------------------------------------------------------------------------
-" Default settings
-" ----------------------------------------------------------------------------
-" bin    : Which REPL binary to execute
-" args   : Arguments to pass to every execution, come before user arguments
-" syntax : Syntax highlighting to use for the REPL buffer
-" title  : Value of b:term_title
-" ----------------------------------------------------------------------------
-let s:repl_default = {
-  \'enter': "\n",
-  \'title': "",
-  \}
-let s:repl = {
-  \ 'guile': {
-    \ 'bin': 'guile',
-    \ 'args': ['-L', '.'],
-    \ 'syntax': 'scheme',
-    \ 'title': 'Guile REPL',
-  \ },
-  \ 'javascript': {
-    \ 'bin': 'node',
-    \ 'args': [],
-    \ 'syntax': 'javascript',
-  \ },
-  \ 'python': {
-    \ 'bin': 'python',
-    \ 'args': [],
-    \ 'syntax': '',
-    \ 'title': 'Python REPL',
-  \ },
-  \ 'r7rs-small': {
-    \ 'bin': 'chibi-scheme',
-    \ 'args': ['-I', '.'],
-    \ 'syntax': '',
-    \ 'title': 'Chibi Scheme',
-  \ },
-  \ 'sh': {
-    \ 'bin': 'sh',
-    \ 'args': [],
-    \ 'syntax': '',
-    \ 'title': 'Bourne Shell',
-  \ },
-\ }
+augroup repl
+  autocmd!
+  " -L adds the current directory to the module load path.
+  autocmd FileType guile let b:repl = { 'bin': 'guile', 'args': [ '-L', '.' ] }
+  autocmd FileType javascript let b:repl = { 'bin': 'node', 'args': [] }
+  autocmd FileType python let b:repl = { 'bin': 'python3', 'args': [] }
+  " -I prepends the current directory to the load-path list.
+  autocmd FileType r7rs-small,r7rs,scheme let b:repl = { 'bin': 'chibi-scheme', 'args': [ '-I', '.' ] }
+augroup END
 
-" ----------------------------------------------------------------------------
-let s:repl['r7rs'] = copy(s:repl['r7rs-small'])
-let s:repl['scheme'] = copy(s:repl['r7rs-small'])
-" ----------------------------------------------------------------------------
-
-" Initialize g:repl.
-let g:repl = get(g:, 'repl', {})
-
-" Initialize the "-" (default) REPL type.
-let g:repl['-'] = extend(s:repl_default, get(g:repl, '-', {}), "force")
-
-" Initialize REPL types.
-for s:type in keys(s:repl)
-  call repl#define_repl(s:type, s:repl[s:type], 'keep')
-endfor
 
 nnoremap <silent> <Plug>(ReplSend)      :set opfunc=<SID>send_to_repl<CR>g@
 nnoremap <silent> <Plug>(ReplSendLine)  :set opfunc=<SID>send_to_repl<CR>g@_
