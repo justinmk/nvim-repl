@@ -148,6 +148,7 @@ augroup repl
   autocmd FileType guile let b:repl = { 'bin': 'guile', 'args': [ '-L', '.' ] }
   autocmd FileType javascript let b:repl = { 'bin': 'node', 'args': [] }
   autocmd FileType python let b:repl = { 'bin': 'python3', 'args': [] }
+  autocmd FileType lua let b:repl = { 'bin': 'lua', 'args': [] }
   " -I prepends the current directory to the load-path list.
   autocmd FileType r7rs-small,r7rs,scheme let b:repl = { 'bin': 'chibi-scheme', 'args': [ '-I', '.' ] }
 augroup END
