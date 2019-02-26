@@ -39,6 +39,7 @@ let g:repl {
 
 ## Related
 
+- [reply.vim](https://github.com/rhysd/reply.vim)
 - [repl.nvim](https://gitlab.com/HiPhish/repl.nvim)
 - [neoterm](https://github.com/kassio/neoterm)
 - [vim-slime](https://github.com/jpalardy/vim-slime)
