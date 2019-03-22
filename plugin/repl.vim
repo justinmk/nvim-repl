@@ -25,7 +25,7 @@ function! s:repl(mods, bang, ...)
   " argument is '-' deduce the type from the current file type. Otherwise the
   " type is the first argument.
   let type = &filetype
-  if a:0 > 0 && a:1 !=? '-'
+  if a:0 > 0 && a:1 != '-'
     if has_key(b:repl, a:1)
       let type = a:1
       " TODO: get b:repl settings for a:type ...
@@ -149,6 +149,8 @@ augroup repl
   autocmd FileType javascript let b:repl = { 'bin': 'node', 'args': [] }
   autocmd FileType python let b:repl = { 'bin': 'python3', 'args': [] }
   autocmd FileType lua let b:repl = { 'bin': 'lua', 'args': [] }
+  " TODO: check b:is_bash
+  autocmd FileType sh let b:repl = { 'bin': 'bash', 'args': [] }
   " -I prepends the current directory to the load-path list.
   autocmd FileType r7rs-small,r7rs,scheme let b:repl = { 'bin': 'chibi-scheme', 'args': [ '-I', '.' ] }
 augroup END
